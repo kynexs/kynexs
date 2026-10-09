@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Contact {
+  id        String   @id
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model Player {
+  id             String       @id
+  registrationId String
+  slot           Int
+  isIgl          Boolean      @default(false)
+  fullName       String
+  age            Int
+  pubgName       String
+  whatsapp       String
+  area           String
+  Registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@unique([registrationId, slot])
+}
+
+model Receipt {
+  id             String       @id
+  registrationId String       @unique
+  fileKey        String       @unique
+  fileUrl        String
+  fileName       String
+  fileType       String
+  fileSize       Int
+  createdAt      DateTime     @default(now())
+  Registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+}
+
+model Registration {
+  id                 String             @id
+  teamName           String
+  contactName        String
+  contactWhatsapp    String
+  contactEmail       String
+  contactAge         Int
+  contactArea        String
+  agreementsAccepted Boolean
+  status             RegistrationStatus @default(PENDING)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime
+  Player             Player[]
+  Receipt            Receipt?
+
+  @@index([contactEmail])
+  @@index([status, createdAt])
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
