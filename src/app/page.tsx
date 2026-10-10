@@ -1,8 +1,19 @@
+import Contact from "@/components/sections/contact";
+import Features from "@/components/sections/features";
+import Hero from "@/components/sections/hero";
+import HowItWorks from "@/components/sections/how-it-works";
+import Marquee from "@/components/sections/marquee";
+import Squad from "@/components/sections/squad";
+
 export default function Home() {
   return (
     <>
-      <h1>Hello World</h1>
-      <p>This is a test</p>
+      <Hero />
+      <Marquee />
+      <Features />
+      <HowItWorks />
+      <Squad />
+      <Contact />
     </>
   );
 }
