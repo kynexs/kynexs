@@ -31,10 +31,10 @@ export type NavItem = (typeof siteConfig.nav)[number];
 
 /** Shown on the Payment step. Replace the placeholders with the real account. */
 export const bankDetails = {
-  accountTitle: "KYNEKS Esports (Pvt) Ltd",
-  bankName: "Your Bank Name",
-  accountNumber: "0000-0000000000",
-  iban: "PK00 XXXX 0000 0000 0000 0000",
+  accountTitle: "TEKNOFEST PAKISTAN",
+  bankName: "Meezan Bank",
+  accountNumber: "0156 0110120268",
+  iban: "PK43 MEZN 0001 5601 1012 0268",
 } as const;
 
 /** Every rule must be ticked before a squad can submit. 5-7 short rules works best. */

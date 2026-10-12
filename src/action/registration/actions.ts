@@ -2,6 +2,8 @@
 
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { buildReceiptKey, parseReceiptKey } from "@/lib/receipt";
 import {
@@ -10,7 +12,7 @@ import {
   validateRegistration,
   validateSlip,
 } from "@/lib/registration";
-import { s3, storageBucket } from "@/lib/s3";
+import { deleteObject, s3, storageBucket } from "@/lib/s3";
 
 export async function uploadReceiptFile(formData: FormData): Promise<string> {
   const file = formData.get("file");
@@ -96,5 +98,41 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
   } catch (error) {
     console.error("registration failed", error);
     throw new Error("Couldn't save your squad. Try again in a moment.");
+  }
+}
+
+export async function deleteRegistration(
+  registrationId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { userId } = await auth();
+  if (!userId) return { ok: false, error: "Unauthorized" };
+
+  const id = registrationId?.trim();
+  if (!id || id.length < 8 || id.length > 80) {
+    return { ok: false, error: "Invalid registration id." };
+  }
+
+  const existing = await prisma.registration.findUnique({
+    where: { id },
+    include: { Receipt: true },
+  });
+  if (!existing) return { ok: false, error: "Registration not found." };
+
+  try {
+    if (existing.Receipt?.fileKey) {
+      await deleteObject(existing.Receipt.fileKey).catch((error) => {
+        console.error("receipt delete failed", error);
+      });
+    }
+
+    await prisma.registration.delete({ where: { id } });
+    revalidatePath("/registration");
+    return { ok: true };
+  } catch (error) {
+    console.error("delete registration failed", error);
+    return {
+      ok: false,
+      error: "Couldn't delete this registration. Try again.",
+    };
   }
 }

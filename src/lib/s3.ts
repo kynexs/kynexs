@@ -1,5 +1,6 @@
 import "dotenv/config";
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -53,4 +54,35 @@ export async function uploadImage(
   );
 
   return { key, url };
+}
+
+export async function deleteObject(key: string): Promise<void> {
+  if (!key) throw new Error("Object key is required");
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: storageBucket(),
+      Key: key,
+    }),
+  );
+}
+
+export async function getObjectSignedUrl(
+  key: string,
+  expiresIn = 3600,
+): Promise<string> {
+  return getSignedUrl(
+    s3,
+    new GetObjectCommand({ Bucket: storageBucket(), Key: key }),
+    { expiresIn },
+  );
+}
+
+export function storageHostname(): string | null {
+  const endpoint = process.env.AWS_ENDPOINT_URL_S3;
+  if (!endpoint) return null;
+  try {
+    return new URL(endpoint).hostname;
+  } catch {
+    return null;
+  }
 }
