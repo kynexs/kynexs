@@ -1,35 +1,29 @@
+import { ClerkProvider } from "@clerk/nextjs";
+import AppSidebar from "@/components/dashboard/app-sidebar";
 import {
-  ClerkProvider,
-  Show,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
-import { Suspense } from "react";
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
-export default function DashboardLayout({ children }: LayoutProps<"/">) {
+export const instant = false;
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <ClerkProvider>
-      <header className="flex h-16 items-center justify-end gap-4 p-4">
-        <Suspense fallback={null}>
-          <Show when="signed-out">
-            <SignInButton />
-            <SignUpButton>
-              <button
-                type="button"
-                className="h-10 cursor-pointer rounded-full bg-purple-700 px-4 text-sm font-medium text-white sm:h-12 sm:px-5 sm:text-base"
-              >
-                Sign Up
-              </button>
-            </SignUpButton>
-          </Show>
-          <Show when="signed-in">
-            <UserButton />
-          </Show>
-        </Suspense>
-      </header>
-
-      {children}
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        </SidebarInset>
+      </SidebarProvider>
     </ClerkProvider>
   );
 }

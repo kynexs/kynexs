@@ -25,7 +25,7 @@ export default function RegistrationDetailSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full gap-0 overflow-y-auto sm:max-w-lg"
+        className="w-full gap-0 overflow-y-auto sm:min-w-lg "
       >
         <SheetHeader className="border-b border-border pb-4">
           <SheetTitle className="font-display text-3xl font-extrabold uppercase">

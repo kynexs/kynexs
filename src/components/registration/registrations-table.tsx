@@ -71,14 +71,9 @@ export default function RegistrationsTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-extrabold uppercase">
-            Registrations
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Search by name, team, phone, or registration id
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Search by name, team, phone, or registration id
+        </p>
         <Input
           value={globalFilter}
           onChange={(event) => {
