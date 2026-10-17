@@ -8,6 +8,11 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  baseURL: process.env.BETTER_AUTH_URL || "https://www.kynexs.com", // Set your production URL
+	trustedOrigins: [
+		"https://www.kynexs.com", // Your production domain
+		"http://localhost:3000", // Local development (remove in production if desired)
+	],
   emailAndPassword: {
     enabled: true,
   },
