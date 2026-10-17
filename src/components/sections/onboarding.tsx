@@ -2,7 +2,7 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { useRef, useState } from "react";
-import { registerSquad } from "@/action/registration/actions";
+import { registerSquad } from "@/actions/registration/actions";
 import Icon from "@/components/common/icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,21 +15,23 @@ import {
 } from "@/components/ui/dialog";
 import { useReceiptUpload } from "@/hooks/useReceiptUpload";
 import { tournamentRules } from "@/lib/config";
+import { cn } from "@/lib/utils";
+import type {
+  FormErrors,
+  GameChoice,
+  IglDetails,
+  PlayerDetails,
+  TeamDetails,
+} from "@/types/registration";
 import {
   emptyIgl,
   emptyPlayer,
-  type FormErrors,
-  type GameChoice,
-  type IglDetails,
   PLAYER_COUNT,
-  type PlayerDetails,
-  type TeamDetails,
   validateGameAndReferral,
   validateIgl,
   validateTeam,
-} from "@/lib/registration";
+} from "@/validations/registration";
 
-import { cn } from "@/lib/utils";
 import {
   AgreementsStep,
   ConfirmationStep,
@@ -120,7 +122,6 @@ export default function Onboarding({
     setServerError("");
     p1Edited.current = false;
   };
-
 
   const close = () => {
     if (busy) return;

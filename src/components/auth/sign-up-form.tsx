@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { claimFirstAdmin } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { claimFirstAdmin } from "@/action/auth/actions";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/services/auth-client";
 
 export default function SignUpForm() {
   const router = useRouter();

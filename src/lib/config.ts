@@ -12,16 +12,15 @@ export const siteConfig = {
     { href: "#how", id: "how", label: "How It Works" },
     { href: "#squad", id: "squad", label: "Players" },
     { href: "#join", id: "join", label: "Pre Registration" },
-    { href: "#contact", id: "contact", label: "Contact" },
   ],
   // Add real URLs here; entries without an href render as "soon" chips.
   // Todo -- Add real WhatsApp number and Facebook page URL.
   socials: [
-    { label: "Discord", href: "https://discadia.com/server/kynex-esports/" },
-    { label: "WhatsApp", href: "https://wa.me/923123456789" },
-    { label: "Facebook", href: "https://www.facebook.com/kynexs" },
-    { label: "Instagram", href: "https://www.instagram.com/kynexs" },
-    { label: "X", href: "https://x.com/kynexs" },
+    { label: "Facebook", href: "https://www.facebook.com/people/Kynexs/61595220321099/" },
+    { label: "Instagram", href: "https://www.instagram.com/kynexs/" },
+    { label: "Discord", href: "#" },
+    { label: "WhatsApp", href: "#" },
+    { label: "X", href: "#" },
   ],
 } as const;
 

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import SignInForm from "@/components/auth/sign-in-form";
-import { getSession } from "@/lib/auth/session";
+import { getSession } from "@/services/auth/session";
 
 export default async function SignInPage({
   searchParams,

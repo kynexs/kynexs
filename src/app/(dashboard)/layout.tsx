@@ -5,7 +5,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { getSession } from "@/lib/auth/session";
+import { getSession } from "@/services/auth/session";
 
 export const instant = false;
 

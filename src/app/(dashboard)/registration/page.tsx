@@ -1,40 +1,41 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
-import RegistrationsTable from "@/components/registration/registrations-table";
-import RegistrationsTableSkeleton from "@/components/registration/registrations-table-skeleton";
-import RegistrationSummaryCards from "@/components/registration/summary-cards";
-import { Skeleton } from "@/components/ui/skeleton";
-import { can } from "@/lib/auth/permissions";
-import { requireSession } from "@/lib/auth/session";
 import {
   getRegistrationStats,
   listRegistrations,
-} from "@/lib/registrations-admin";
+} from "@/actions/registration/admin";
+import DashboardPageHeader from "@/components/dashboard/page-header";
+import DashboardPageShell from "@/components/dashboard/page-shell";
+import StatCardsSkeleton from "@/components/dashboard/stat-cards-skeleton";
+import DataTableSkeleton from "@/components/data-table/data-table-skeleton";
+import { can } from "@/services/auth/permissions";
+import { requireSession } from "@/services/auth/session";
+import RegistrationsTable from "./features/registrations-table";
+import RegistrationSummaryCards from "./features/summary-cards";
 
 export default function RegistrationPage() {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-4 pb-8 sm:px-6 lg:px-8 space-y-8">
-      <header className="space-y-3">
-      <p className="font-heading text-xs font-semibold tracking-[0.3em] text-lime uppercase">
-          Dashboard
-        </p>
-        <h1 className="font-display text-4xl font-extrabold tracking-tight uppercase sm:text-5xl">
-          Registration
-        </h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Review squads, payment slips, and player details. Delete only when you
-          are sure — the slip file is removed from storage too.
-        </p>
-      </header>
+    <DashboardPageShell className="space-y-8">
+      <DashboardPageHeader
+        heading="Registration"
+        description="Review squads, payment slips, and player details. Delete only when you are sure — the slip file is removed from storage too."
+      />
 
-      <Suspense fallback={<SummaryCardsSkeleton />}>
+      <Suspense
+        fallback={
+          <StatCardsSkeleton
+            count={4}
+            className="sm:grid-cols-2 xl:grid-cols-4"
+          />
+        }
+      >
         <SummarySection />
       </Suspense>
 
-      <Suspense fallback={<RegistrationsTableSkeleton />}>
+      <Suspense fallback={<DataTableSkeleton />}>
         <TableSection />
       </Suspense>
-    </div>
+    </DashboardPageShell>
   );
 }
 
@@ -53,15 +54,5 @@ async function TableSection() {
       data={registrations}
       canDelete={can(session, "registration:delete")}
     />
-  );
-}
-
-function SummaryCardsSkeleton() {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <Skeleton key={`stat-${index + 1}`} className="h-32 rounded-xl" />
-      ))}
-    </div>
   );
 }

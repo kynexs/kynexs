@@ -1,37 +1,38 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
-import ContactsTable from "@/components/contacts/contacts-table";
-import ContactSummaryCards from "@/components/contacts/summary-cards";
-import RegistrationsTableSkeleton from "@/components/registration/registrations-table-skeleton";
-import { Skeleton } from "@/components/ui/skeleton";
-import { can } from "@/lib/auth/permissions";
-import { getSession } from "@/lib/auth/session";
-import { getContactStats, listContacts } from "@/lib/contacts-admin";
+import { getContactStats, listContacts } from "@/actions/contacts/admin";
+import DashboardPageHeader from "@/components/dashboard/page-header";
+import DashboardPageShell from "@/components/dashboard/page-shell";
+import StatCardsSkeleton from "@/components/dashboard/stat-cards-skeleton";
+import DataTableSkeleton from "@/components/data-table/data-table-skeleton";
+import { can } from "@/services/auth/permissions";
+import { getSession } from "@/services/auth/session";
+import ContactsTable from "./features/contacts-table";
+import ContactSummaryCards from "./features/summary-cards";
 
 export default function ContactsPage() {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-4 pb-8 sm:px-6 lg:px-8 space-y-8">
-      <header className="space-y-3">
-        <p className="font-heading text-xs font-semibold tracking-[0.3em] text-lime uppercase">  
-          Dashboard
-        </p>
-        <h1 className="font-display text-4xl font-extrabold tracking-tight uppercase sm:text-5xl"> 
-          Contacts
-        </h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Review inbound messages, mark threads as replied, and remove spam when
-          needed.
-        </p>
-      </header>
+    <DashboardPageShell className="space-y-8">
+      <DashboardPageHeader
+        heading="Contacts"
+        description="Review inbound messages, mark threads as replied, and remove spam when needed."
+      />
 
-      <Suspense fallback={<SummaryCardsSkeleton />}>
+      <Suspense
+        fallback={
+          <StatCardsSkeleton
+            count={3}
+            className="sm:grid-cols-2 xl:grid-cols-3"
+          />
+        }
+      >
         <SummarySection />
       </Suspense>
 
-      <Suspense fallback={<RegistrationsTableSkeleton />}>
+      <Suspense fallback={<DataTableSkeleton />}>
         <TableSection />
       </Suspense>
-    </div>
+    </DashboardPageShell>
   );
 }
 
@@ -43,20 +44,7 @@ async function SummarySection() {
 
 async function TableSection() {
   await connection();
-  const [session, contacts] = await Promise.all([
-    getSession(),
-    listContacts(),
-  ]);
+  const [session, contacts] = await Promise.all([getSession(), listContacts()]);
   const canDelete = session ? can(session, "contact:delete") : false;
   return <ContactsTable data={contacts} canDelete={canDelete} />;
-}
-
-function SummaryCardsSkeleton() {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <Skeleton key={`stat-${index + 1}`} className="h-32 rounded-xl" />
-      ))}
-    </div>
-  );
 }

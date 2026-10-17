@@ -7,19 +7,18 @@ import {
   useRef,
   useState,
 } from "react";
-import { sendContact } from "@/action/contacts/actions";
+import { sendContact } from "@/actions/contacts/actions";
 import Icon from "@/components/common/icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { ContactField, ContactInput } from "@/types/contact";
 import {
   CONTACT_FIELDS,
-  type ContactField,
-  type ContactInput,
   validateContact,
   validateContactField,
-} from "@/lib/contact";
+} from "@/validations/contact";
 
 type Status = "idle" | "loading" | "success" | "error";
 

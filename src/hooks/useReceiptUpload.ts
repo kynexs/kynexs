@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { uploadReceiptFile } from "@/action/registration/actions";
-import { validateSlip } from "@/lib/registration";
+import { uploadReceiptFile } from "@/actions/registration/actions";
+import { validateSlip } from "@/validations/registration";
 
 export type ReceiptUploadState = {
   file: File | null;

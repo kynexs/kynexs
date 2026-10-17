@@ -1,6 +1,5 @@
 "use client";
 
-import { format } from "date-fns";
 import { CalendarIcon, XIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
@@ -26,13 +25,6 @@ export default function DateRangeFilter({
   onChange: (next: DateRangeValue) => void;
   className?: string;
 }) {
-  const label =
-    value.from && value.to
-      ? `${format(value.from, "dd MMM yyyy")} – ${format(value.to, "dd MMM yyyy")}`
-      : value.from
-        ? `${format(value.from, "dd MMM yyyy")} – …`
-        : "Created at";
-
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Popover>

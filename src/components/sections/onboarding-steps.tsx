@@ -7,25 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import type { ReceiptUpload } from "@/hooks/useReceiptUpload";
-import {
-  bankDetails,
-  confirmationMessage,
-  registrationDetails,
-  tournamentRules,
-} from "@/lib/config";
-import {
-  type FormErrors,
-  type GameChoice,
-  type IglDetails,
-  MAX_SLIP_BYTES,
-  PLAYER_COUNT,
-  type PlayerDetails,
-  SLIP_TYPES,
-  type TeamDetails,
-  validateSlip,
-} from "@/lib/registration";
-import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -33,7 +14,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import type { ReceiptUpload } from "@/hooks/useReceiptUpload";
+import {
+  bankDetails,
+  confirmationMessage,
+  registrationDetails,
+  tournamentRules,
+} from "@/lib/config";
+import { cn } from "@/lib/utils";
+import type {
+  FormErrors,
+  GameChoice,
+  IglDetails,
+  PlayerDetails,
+  TeamDetails,
+} from "@/types/registration";
+import {
+  MAX_SLIP_BYTES,
+  PLAYER_COUNT,
+  SLIP_TYPES,
+  validateSlip,
+} from "@/validations/registration";
 
 const fieldClass =
   "h-12 rounded-lg border-white/10 bg-surface-200 px-4 text-base text-white placeholder:text-text-muted md:text-base";
@@ -154,38 +155,12 @@ export function IglStep({
     />
   );
   return (
-    <div className={grid}>
-      <div className="sm:col-span-2">
-        <Label
-          htmlFor="game"
-          className="mb-2 text-sm font-medium text-text-secondary"
-        >
-          Select game
-        </Label>
-        <Select
-          value={game || undefined}
-          onValueChange={(next) => {
-            if (next === "PUBG" || next === "FREE_FIRE") onGameChange(next);
-          }}
-        >
-          <SelectTrigger
-            id="game"
-            className={cn(fieldClass, "w-full")}
-            aria-invalid={errors.game ? true : undefined}
-          >
-            <SelectValue placeholder="PUBG or Free Fire" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PUBG">PUBG</SelectItem>
-            <SelectItem value="FREE_FIRE">Free Fire</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.game && (
-          <p role="alert" className="mt-2 text-sm text-status-danger">
-            {errors.game}
-          </p>
-        )}
-      </div>
+    <div className={cn(grid, "pb-24")}>
+      {field("fullName", "name", "sm:col-span-2")}
+      {field("whatsapp", "tel")}
+      {field("age", "off")}
+      {field("email", "email", "sm:col-span-2")}
+      {field("area", "off", "sm:col-span-2")}
       <div className="sm:col-span-2">
         <Label
           htmlFor="referralCode"
@@ -211,15 +186,40 @@ export function IglStep({
           </p>
         )}
       </div>
-      {field("fullName", "name", "sm:col-span-2")}
-      {field("whatsapp", "tel")}
-      {field("age", "off")}
-      {field("email", "email", "sm:col-span-2")}
-      {field("area", "off", "sm:col-span-2")}
+      <div className="sm:col-span-2">
+        <Label
+          htmlFor="game"
+          className="mb-2 text-sm font-medium text-text-secondary"
+        >
+          Select game
+        </Label>
+        <Select
+          value={game || undefined}
+          onValueChange={(next) => {
+            if (next === "PUBG" || next === "FREE_FIRE") onGameChange(next);
+          }}
+        >
+          <SelectTrigger
+            id="game"
+            className={cn(fieldClass, "w-full")}
+            aria-invalid={errors.game ? true : undefined}
+          >
+            <SelectValue placeholder="PUBG or Free Fire" />
+          </SelectTrigger>
+          <SelectContent alignItemWithTrigger={false} sideOffset={6}>
+            <SelectItem value="PUBG">PUBG</SelectItem>
+            <SelectItem value="FREE_FIRE">Free Fire</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.game && (
+          <p role="alert" className="mt-2 text-sm text-status-danger">
+            {errors.game}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
-
 
 export function TeamStep({
   value,

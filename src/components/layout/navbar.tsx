@@ -115,7 +115,7 @@ export default function Navbar() {
 
             <div className="flex items-center gap-3">
               <a
-                href="#join"
+                href="#contact"
                 className={cn(
                   buttonVariants({
                     className:
@@ -123,7 +123,7 @@ export default function Navbar() {
                   }),
                 )}
               >
-                Notify me
+                Contact Us
                 <Icon name="arrowRight" className="size-4" />
               </a>
               <Button

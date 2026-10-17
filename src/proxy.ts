@@ -8,7 +8,6 @@ const protectedPrefixes = [
   "/gaming-zones",
   "/contacts",
   "/users",
-  "/dashboard",
 ];
 
 export function proxy(request: NextRequest) {

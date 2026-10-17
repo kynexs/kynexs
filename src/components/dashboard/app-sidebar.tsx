@@ -24,7 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/services/auth-client";
 
 const navItems = [
   { title: "Overview", href: "/overview", icon: LayoutDashboard },
