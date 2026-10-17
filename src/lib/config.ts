@@ -16,7 +16,10 @@ export const siteConfig = {
   // Add real URLs here; entries without an href render as "soon" chips.
   // Todo -- Add real WhatsApp number and Facebook page URL.
   socials: [
-    { label: "Facebook", href: "https://www.facebook.com/people/Kynexs/61595220321099/" },
+    {
+      label: "Facebook",
+      href: "https://www.facebook.com/people/Kynexs/61595220321099/",
+    },
     { label: "Instagram", href: "https://www.instagram.com/kynexs/" },
     { label: "Discord", href: "#" },
     { label: "WhatsApp", href: "#" },
@@ -25,7 +28,6 @@ export const siteConfig = {
 } as const;
 
 export type NavItem = (typeof siteConfig.nav)[number];
-
 
 // Everything an organiser may want to edit before launch lives here.
 

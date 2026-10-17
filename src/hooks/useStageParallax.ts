@@ -13,8 +13,12 @@ export function useStageParallax<T extends HTMLElement>() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const canHover = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (!canHover || reduced) return;
 
     const target = { x: 0, y: 0 };
@@ -27,7 +31,9 @@ export function useStageParallax<T extends HTMLElement>() {
       current.y += (target.y - current.y) * 0.08;
       el.style.setProperty("--mx", current.x.toFixed(4));
       el.style.setProperty("--my", current.y.toFixed(4));
-      const settled = Math.abs(target.x - current.x) < 0.001 && Math.abs(target.y - current.y) < 0.001;
+      const settled =
+        Math.abs(target.x - current.x) < 0.001 &&
+        Math.abs(target.y - current.y) < 0.001;
       raf = settled ? 0 : requestAnimationFrame(frame);
     };
     const kick = () => {

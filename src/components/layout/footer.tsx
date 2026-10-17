@@ -57,7 +57,6 @@ export default function Footer() {
                   </a>
                 </li>
               ))}
-
             </ul>
           </div>
         </div>
