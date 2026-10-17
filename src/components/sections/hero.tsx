@@ -10,7 +10,7 @@ import RegisterButton from "./register-button";
 
 const enter = (ms: number): CSSProperties => ({
   animationDelay: `calc(var(--intro) + ${ms}ms)`,
-});
+}); 
 
 const outlineCta = cn(
   buttonVariants({
@@ -53,16 +53,6 @@ export default function Hero() {
       <Container>
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6">
           <div>
-            <p
-              className="inline-flex animate-rise items-center gap-3 border border-lime/30 bg-lime/6 px-4 py-2 font-heading text-[11px] font-semibold tracking-[0.3em] text-lime uppercase sm:text-xs"
-              style={enter(0)}
-            >
-              <span className="relative flex size-2" aria-hidden="true">
-                <span className="absolute inline-flex size-full animate-ping-soft rounded-full bg-lime" />
-                <span className="relative inline-flex size-2 rounded-full bg-lime" />
-              </span>
-              Registrations opening soon
-            </p>
 
             <h1 className="mt-6 font-display text-[clamp(6rem,17vw,12.5rem)] leading-[0.78] font-extrabold tracking-tight uppercase">
               <span className="block animate-rise" style={enter(120)}>

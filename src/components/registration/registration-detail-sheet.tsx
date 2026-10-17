@@ -41,10 +41,17 @@ export default function RegistrationDetailSheet({
             <dl className="grid gap-3 text-sm">
               <Row label="Registration ID" value={registration.id} mono />
               <Row label="Name" value={registration.contactName} />
+              <Row
+                label="Game"
+                value={
+                  registration.game === "FREE_FIRE" ? "Free Fire" : "PUBG"
+                }
+              />
               <Row label="Phone" value={registration.contactWhatsapp} />
               <Row label="Team" value={registration.teamName} />
               <Row label="Email" value={registration.contactEmail} />
               <Row label="Area" value={registration.contactArea} />
+
             </dl>
 
             <section className="space-y-3">

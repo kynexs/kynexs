@@ -46,29 +46,18 @@ export default function Footer() {
             <ul className="flex flex-wrap gap-2">
               {siteConfig.socials.map((s) => (
                 <li key={s.label}>
-                  {s.href ? (
-                    <a
-                      href={s.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-10 items-center gap-1.5 border border-white/10 px-3.5 text-sm text-text-secondary transition-colors hover:border-lime hover:text-lime"
-                    >
-                      {s.label}
-                      <Icon name="arrowUpRight" className="size-3.5" />
-                    </a>
-                  ) : (
-                    <span
-                      title="Coming soon"
-                      className="inline-flex min-h-10 cursor-default items-center gap-2 border border-dashed border-white/10 px-3.5 text-sm text-text-disabled"
-                    >
-                      {s.label}
-                      <span className="text-[9px] font-semibold tracking-widest text-lime/60 uppercase">
-                        Soon
-                      </span>
-                    </span>
-                  )}
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-10 items-center gap-1.5 border border-white/10 px-3.5 text-sm text-text-secondary transition-colors hover:border-lime hover:text-lime"
+                  >
+                    {s.label}
+                    <Icon name="arrowUpRight" className="size-3.5" />
+                  </a>
                 </li>
               ))}
+
             </ul>
           </div>
         </div>

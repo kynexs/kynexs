@@ -27,6 +27,8 @@ export type RegistrationRow = {
   contactAge: number;
   contactArea: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
+  game: "PUBG" | "FREE_FIRE";
+  referralCodeEntered: string | null;
   createdAt: string;
   players: RegistrationPlayer[];
   receipt: RegistrationReceipt | null;

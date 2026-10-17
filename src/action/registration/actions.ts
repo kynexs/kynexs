@@ -2,9 +2,10 @@
 
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma";
+import { assertCan } from "@/lib/auth/permissions";
+import { getSession } from "@/lib/auth/session";
+import { prisma } from "@/lib/services/prisma";
 import { buildReceiptKey, parseReceiptKey } from "@/lib/receipt";
 import {
   detectSlipType,
@@ -12,7 +13,8 @@ import {
   validateRegistration,
   validateSlip,
 } from "@/lib/registration";
-import { deleteObject, s3, storageBucket } from "@/lib/s3";
+import { deleteObject, s3, storageBucket } from "@/lib/services/s3";
+
 
 export async function uploadReceiptFile(formData: FormData): Promise<string> {
   const file = formData.get("file");
@@ -53,6 +55,15 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
   const parsed = parseReceiptKey(data.receiptKey);
   if (!parsed) throw new Error("Upload your payment slip.");
 
+  let gamingZoneId: string | null = null;
+  if (data.referralCode) {
+    const zone = await prisma.gamingZone.findUnique({
+      where: { referralCode: data.referralCode },
+    });
+    if (!zone) throw new Error("Invalid referral code.");
+    gamingZoneId = zone.id;
+  }
+
   const fileUrl = await getSignedUrl(
     s3,
     new GetObjectCommand({ Bucket: storageBucket(), Key: data.receiptKey }),
@@ -70,6 +81,9 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
         contactAge: data.igl.age,
         contactArea: data.igl.area,
         agreementsAccepted: true,
+        game: data.game,
+        gamingZoneId,
+        referralCodeEntered: data.referralCode,
         updatedAt: new Date(),
         Player: {
           create: data.players.map((player) => ({
@@ -104,8 +118,10 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
 export async function deleteRegistration(
   registrationId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { userId } = await auth();
-  if (!userId) return { ok: false, error: "Unauthorized" };
+  const session = await getSession();
+  if (!session) return { ok: false, error: "Unauthorized" };
+  const allowed = assertCan(session, "registration:delete");
+  if (!allowed.ok) return allowed;
 
   const id = registrationId?.trim();
   if (!id || id.length < 8 || id.length > 80) {

@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "./generated/prisma"
@@ -7,14 +8,49 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Game {
+  PUBG
+  FREE_FIRE
+}
+
+enum ContactStatus {
+  UNREPLIED
+  REPLIED
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Contact {
-  id        String   @id
+  id        String        @id
   name      String
   email     String
   phone     String?
   message   String
-  createdAt DateTime @default(now())
+  status    ContactStatus @default(UNREPLIED)
+  createdAt DateTime      @default(now())
   updatedAt DateTime
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model GamingZone {
+  id            String         @id
+  zoneName      String
+  zoneNumber    String
+  zoneLocation  String
+  referralCode  String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime
+  registrations Registration[]
+
+  @@index([referralCode])
+  @@index([createdAt])
+  @@index([zoneName])
 }
 
 model Player {
@@ -45,26 +81,95 @@ model Receipt {
 }
 
 model Registration {
-  id                 String             @id
-  teamName           String
-  contactName        String
-  contactWhatsapp    String
-  contactEmail       String
-  contactAge         Int
-  contactArea        String
-  agreementsAccepted Boolean
-  status             RegistrationStatus @default(PENDING)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime
-  Player             Player[]
-  Receipt            Receipt?
+  id                  String             @id
+  teamName            String
+  contactName         String
+  contactWhatsapp     String
+  contactEmail        String
+  contactAge          Int
+  contactArea         String
+  agreementsAccepted  Boolean
+  status              RegistrationStatus @default(PENDING)
+  game                Game               @default(PUBG)
+  gamingZoneId        String?
+  referralCodeEntered String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime
+  Player              Player[]
+  Receipt             Receipt?
+  gamingZone          GamingZone?        @relation(fields: [gamingZoneId], references: [id], onDelete: SetNull)
 
   @@index([contactEmail])
   @@index([status, createdAt])
+  @@index([game, createdAt])
+  @@index([gamingZoneId])
+  @@index([createdAt])
 }
 
-enum RegistrationStatus {
-  PENDING
-  APPROVED
-  REJECTED
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String?
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { sendContact } from "@/action/contact/actions";
+import { sendContact } from "@/action/contacts/actions";
 import Icon from "@/components/common/icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -4,8 +4,8 @@ import type {
   RegistrationRow,
   RegistrationStats,
 } from "@/components/registration/types";
-import { prisma } from "@/lib/prisma";
-import { getObjectSignedUrl } from "@/lib/s3";
+import { prisma } from "@/lib/services/prisma";
+import { getObjectSignedUrl } from "@/lib/services/s3";
 
 export async function getRegistrationStats(): Promise<RegistrationStats> {
   const [totalRegistrations, withSlip, totalPlayers] = await Promise.all([
@@ -57,8 +57,11 @@ export async function listRegistrations(): Promise<RegistrationRow[]> {
         contactAge: row.contactAge,
         contactArea: row.contactArea,
         status: row.status,
+        game: row.game,
+        referralCodeEntered: row.referralCodeEntered,
         createdAt: row.createdAt.toISOString(),
         players: row.Player.map((player) => ({
+
           id: player.id,
           slot: player.slot,
           isIgl: player.isIgl,

@@ -19,13 +19,16 @@ import {
   emptyIgl,
   emptyPlayer,
   type FormErrors,
+  type GameChoice,
   type IglDetails,
   PLAYER_COUNT,
   type PlayerDetails,
   type TeamDetails,
+  validateGameAndReferral,
   validateIgl,
   validateTeam,
 } from "@/lib/registration";
+
 import { cn } from "@/lib/utils";
 import {
   AgreementsStep,
@@ -72,6 +75,8 @@ export default function Onboarding({
   const [step, setStep] = useState(0);
   const [igl, setIgl] = useState<IglDetails>(emptyIgl);
   const [team, setTeam] = useState<TeamDetails>(newTeam);
+  const [game, setGame] = useState<GameChoice | "">("");
+  const [referralCode, setReferralCode] = useState("");
   const receipt = useReceiptUpload();
   const [accepted, setAccepted] = useState<boolean[]>(noRulesAccepted);
   const [showErrors, setShowErrors] = useState(false);
@@ -89,12 +94,16 @@ export default function Onboarding({
         ? "Wait for the upload to finish."
         : (receipt.error ?? "Upload your payment slip.");
   const errorsByStep: Record<number, FormErrors> = {
-    0: validateIgl(igl),
+    0: {
+      ...validateIgl(igl),
+      ...validateGameAndReferral({ game, referralCode }),
+    },
     1: validateTeam(team),
     2: slipError ? { slip: slipError } : {},
     3: allAccepted ? {} : { agreements: "Accept every rule to continue." },
     4: {},
   };
+
   const errors = errorsByStep[step] ?? {};
   const visible: FormErrors = showErrors ? errors : {};
 
@@ -102,6 +111,8 @@ export default function Onboarding({
     setStep(0);
     setIgl(emptyIgl());
     setTeam(newTeam());
+    setGame("");
+    setReferralCode("");
     receipt.choose(null);
     setAccepted(noRulesAccepted());
     setShowErrors(false);
@@ -109,6 +120,7 @@ export default function Onboarding({
     setServerError("");
     p1Edited.current = false;
   };
+
 
   const close = () => {
     if (busy) return;
@@ -126,12 +138,18 @@ export default function Onboarding({
     setStatus("loading");
     setServerError("");
     try {
+      if (game !== "PUBG" && game !== "FREE_FIRE") {
+        throw new Error("Select a game.");
+      }
       await registerSquad({
         igl,
         ...team,
         agreementsAccepted: true,
         receiptKey: receipt.key,
+        game,
+        referralCode,
       });
+
       setStatus("idle");
       go(LAST);
     } catch (err) {
@@ -236,6 +254,10 @@ export default function Onboarding({
                         [field]: value,
                       }))
                     }
+                    game={game}
+                    onGameChange={setGame}
+                    referralCode={referralCode}
+                    onReferralChange={setReferralCode}
                   />
                 )}
                 {step === 1 && (

@@ -4,6 +4,8 @@ import RegistrationsTable from "@/components/registration/registrations-table";
 import RegistrationsTableSkeleton from "@/components/registration/registrations-table-skeleton";
 import RegistrationSummaryCards from "@/components/registration/summary-cards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { can } from "@/lib/auth/permissions";
+import { requireSession } from "@/lib/auth/session";
 import {
   getRegistrationStats,
   listRegistrations,
@@ -11,13 +13,13 @@ import {
 
 export default function RegistrationPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="space-y-2">
-        <p className="font-heading text-xs font-semibold tracking-[0.3em] text-lime uppercase">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-4 pb-8 sm:px-6 lg:px-8 space-y-8">
+      <header className="space-y-3">
+      <p className="font-heading text-xs font-semibold tracking-[0.3em] text-lime uppercase">
           Dashboard
         </p>
         <h1 className="font-display text-4xl font-extrabold tracking-tight uppercase sm:text-5xl">
-          Registrations
+          Registration
         </h1>
         <p className="max-w-2xl text-muted-foreground">
           Review squads, payment slips, and player details. Delete only when you
@@ -44,8 +46,14 @@ async function SummarySection() {
 
 async function TableSection() {
   await connection();
+  const session = await requireSession();
   const registrations = await listRegistrations();
-  return <RegistrationsTable data={registrations} />;
+  return (
+    <RegistrationsTable
+      data={registrations}
+      canDelete={can(session, "registration:delete")}
+    />
+  );
 }
 
 function SummaryCardsSkeleton() {

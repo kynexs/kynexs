@@ -38,11 +38,16 @@ export type PlayerDetails = {
 export type TeamDetails = { teamName: string; players: PlayerDetails[] };
 
 /** What the form sends as JSON. `receiptKey` comes from /api/upload. Ages stay strings until validated. */
+export type GameChoice = "PUBG" | "FREE_FIRE";
+
 export type RegistrationInput = TeamDetails & {
   igl: IglDetails;
   agreementsAccepted: boolean;
   receiptKey: string;
+  game: GameChoice;
+  referralCode?: string;
 };
+
 
 /** Flat map keyed by path, e.g. "igl.email", "teamName", "players.2.pubgName". */
 export type FormErrors = Record<string, string>;
@@ -141,6 +146,8 @@ export type RegistrationData = {
   receiptKey: string;
   receiptFileName: string;
   teamName: string;
+  game: GameChoice;
+  referralCode: string | null;
   igl: {
     fullName: string;
     whatsapp: string;
@@ -159,6 +166,26 @@ export type RegistrationData = {
   }[];
 };
 
+export function validateGameAndReferral(raw: unknown): FormErrors {
+  const input = obj(raw);
+  const errors: FormErrors = {};
+  const game = str(input.game);
+  if (game !== "PUBG" && game !== "FREE_FIRE") {
+    errors.game = "Select a game.";
+  }
+  const referral = str(input.referralCode);
+  if (referral && referral.length > 32) {
+    errors.referralCode = "Referral code is too long.";
+  }
+  return errors;
+}
+
+export function normalizeReferralCode(raw: unknown): string | null {
+  const value = str(raw).toUpperCase().replace(/\s+/g, "");
+  return value || null;
+}
+
+
 export function validateRegistration(
   raw: unknown,
 ): { ok: true; data: RegistrationData } | { ok: false; errors: FormErrors } {
@@ -166,6 +193,7 @@ export function validateRegistration(
   const errors: FormErrors = {
     ...validateIgl(input.igl),
     ...validateTeam(input),
+    ...validateGameAndReferral(input),
   };
   if (input.agreementsAccepted !== true)
     errors.agreementsAccepted = "You must accept all tournament rules.";
@@ -189,6 +217,8 @@ export function validateRegistration(
       };
     });
 
+  const game = str(input.game) as GameChoice;
+
   return {
     ok: true,
     data: {
@@ -196,6 +226,8 @@ export function validateRegistration(
       receiptKey: String(input.receiptKey),
       receiptFileName: receipt.fileName,
       teamName: str(input.teamName),
+      game,
+      referralCode: normalizeReferralCode(input.referralCode),
       igl: {
         fullName: str(igl.fullName),
         whatsapp: normalizePhone(igl.whatsapp),

@@ -33,7 +33,7 @@ export default function Countdown({
           className,
         )}
       >
-        Registrations are open
+        Today is the match date
       </output>
     );
   }

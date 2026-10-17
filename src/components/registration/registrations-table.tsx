@@ -7,8 +7,19 @@ import {
   useTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
+import DateRangeFilter, {
+  type DateRangeValue,
+  rowInDateRange,
+} from "@/components/dashboard/date-range-filter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -17,24 +28,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { columns } from "./columns";
+import { createRegistrationColumns } from "./columns";
 import { features } from "./data-table-features";
 import type { RegistrationRow } from "./types";
 
+type GameFilter = "ALL" | "PUBG" | "FREE_FIRE";
+
 export default function RegistrationsTable({
   data,
+  canDelete,
 }: {
   data: RegistrationRow[];
+  canDelete: boolean;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [gameFilter, setGameFilter] = useState<GameFilter>("ALL");
+  const [dateRange, setDateRange] = useState<DateRangeValue>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const rows = useMemo(() => data, [data]);
+  const columns = useMemo(
+    () => createRegistrationColumns(canDelete),
+    [canDelete],
+  );
+
+  const rows = useMemo(() => {
+    return data.filter((row) => {
+      if (gameFilter !== "ALL" && row.game !== gameFilter) return false;
+      if (!rowInDateRange(row.createdAt, dateRange)) return false;
+      return true;
+    });
+  }, [data, gameFilter, dateRange]);
 
   const table = useTable({
     features,
@@ -70,20 +98,54 @@ export default function RegistrationsTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Search by name, team, phone, or registration id
-        </p>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+
         <Input
           value={globalFilter}
           onChange={(event) => {
             setGlobalFilter(event.target.value);
             setPagination((current) => ({ ...current, pageIndex: 0 }));
           }}
-          placeholder="Search registrations…"
+          placeholder="Search registrations by name…"
           className="h-10 max-w-sm bg-surface-200"
           aria-label="Search registrations"
         />
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <Select
+            value={gameFilter}
+            onValueChange={(value) => {
+              if (
+                value === "ALL" ||
+                value === "PUBG" ||
+                value === "FREE_FIRE"
+              ) {
+                setGameFilter(value);
+                setPagination((current) => ({ ...current, pageIndex: 0 }));
+              }
+            }}
+          >
+            <SelectTrigger
+              className="h-10 w-[160px] bg-surface-200"
+              aria-label="Filter by game"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All games</SelectItem>
+              <SelectItem value="PUBG">PUBG</SelectItem>
+              <SelectItem value="FREE_FIRE">Free Fire</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <DateRangeFilter
+            value={dateRange}
+            onChange={(next) => {
+              setDateRange(next);
+              setPagination((current) => ({ ...current, pageIndex: 0 }));
+            }}
+          />
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-surface-100/60">
@@ -120,7 +182,7 @@ export default function RegistrationsTable({
                 >
                   {data.length === 0
                     ? "No registrations yet."
-                    : "No registrations match your search."}
+                    : "No registrations match your filters."}
                 </TableCell>
               </TableRow>
             )}

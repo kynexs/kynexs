@@ -11,10 +11,12 @@ import type { ReceiptUpload } from "@/hooks/useReceiptUpload";
 import {
   bankDetails,
   confirmationMessage,
+  registrationDetails,
   tournamentRules,
 } from "@/lib/config";
 import {
   type FormErrors,
+  type GameChoice,
   type IglDetails,
   MAX_SLIP_BYTES,
   PLAYER_COUNT,
@@ -24,6 +26,14 @@ import {
   validateSlip,
 } from "@/lib/registration";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 const fieldClass =
   "h-12 rounded-lg border-white/10 bg-surface-200 px-4 text-base text-white placeholder:text-text-muted md:text-base";
@@ -115,10 +125,18 @@ export function IglStep({
   value,
   errors,
   onChange,
+  game,
+  onGameChange,
+  referralCode,
+  onReferralChange,
 }: {
   value: IglDetails;
   errors: FormErrors;
   onChange: (field: keyof IglDetails, value: string) => void;
+  game: GameChoice | "";
+  onGameChange: (game: GameChoice) => void;
+  referralCode: string;
+  onReferralChange: (value: string) => void;
 }) {
   const field = (
     kind: keyof IglDetails,
@@ -137,6 +155,62 @@ export function IglStep({
   );
   return (
     <div className={grid}>
+      <div className="sm:col-span-2">
+        <Label
+          htmlFor="game"
+          className="mb-2 text-sm font-medium text-text-secondary"
+        >
+          Select game
+        </Label>
+        <Select
+          value={game || undefined}
+          onValueChange={(next) => {
+            if (next === "PUBG" || next === "FREE_FIRE") onGameChange(next);
+          }}
+        >
+          <SelectTrigger
+            id="game"
+            className={cn(fieldClass, "w-full")}
+            aria-invalid={errors.game ? true : undefined}
+          >
+            <SelectValue placeholder="PUBG or Free Fire" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="PUBG">PUBG</SelectItem>
+            <SelectItem value="FREE_FIRE">Free Fire</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.game && (
+          <p role="alert" className="mt-2 text-sm text-status-danger">
+            {errors.game}
+          </p>
+        )}
+      </div>
+      <div className="sm:col-span-2">
+        <Label
+          htmlFor="referralCode"
+          className="mb-2 text-sm font-medium text-text-secondary"
+        >
+          Referral code{" "}
+          <span className="font-normal text-text-muted">(optional)</span>
+        </Label>
+        <Input
+          id="referralCode"
+          name="referralCode"
+          value={referralCode}
+          placeholder="Gaming zone referral code"
+          maxLength={32}
+          autoComplete="off"
+          aria-invalid={errors.referralCode ? true : undefined}
+          className={fieldClass}
+          onChange={(e) => onReferralChange(e.target.value)}
+        />
+        {errors.referralCode && (
+          <p role="alert" className="mt-2 text-sm text-status-danger">
+            {errors.referralCode}
+          </p>
+        )}
+      </div>
       {field("fullName", "name", "sm:col-span-2")}
       {field("whatsapp", "tel")}
       {field("age", "off")}
@@ -145,6 +219,7 @@ export function IglStep({
     </div>
   );
 }
+
 
 export function TeamStep({
   value,
@@ -254,6 +329,18 @@ export function PaymentStep({
 
   return (
     <div className="space-y-5">
+      <div className="border border-lime/30 bg-lime/5 px-4 py-3">
+        <p className="font-heading text-[11px] font-semibold tracking-[0.2em] text-lime uppercase">
+          Registration fee
+        </p>
+        <p className="mt-1 font-display text-3xl font-extrabold text-white">
+          Rs {registrationDetails.registrationFee.toLocaleString("en-PK")}
+        </p>
+        <p className="mt-1 text-sm text-text-muted">
+          {registrationDetails.registrationFeeText}
+        </p>
+      </div>
+
       <dl className="divide-y divide-white/10 border border-white/10 bg-surface-200/60">
         {bankRows.map(([label, value]) => (
           <div

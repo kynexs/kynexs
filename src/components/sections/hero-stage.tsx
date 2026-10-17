@@ -182,7 +182,7 @@ export default function HeroStage() {
               src={operator.src}
               width={operator.width}
               height={operator.height}
-              alt="KYNEKS operator character skydiving into the arena"
+              alt="KYNEXS operator character skydiving into the arena"
               priority
               sizes="(min-width:1024px) 360px, 60vw"
               className="h-auto w-full animate-float drop-shadow-[0_0_40px_rgb(from_var(--color-lime)_r_g_b_/_0.3)]"
@@ -215,7 +215,6 @@ export default function HeroStage() {
           >
             <div className="glass flex items-center gap-2 border border-white/15 px-3 py-2 font-heading text-[10px] font-semibold tracking-[0.2em] text-white uppercase sm:text-xs">
               <Icon name="crosshair" className="size-4 text-lime" />
-              Battle royale
             </div>
           </div>
           <div
@@ -227,7 +226,6 @@ export default function HeroStage() {
                 <span className="absolute inline-flex size-full animate-ping-soft rounded-full bg-lime" />
                 <span className="relative inline-flex size-2 rounded-full bg-lime" />
               </span>
-              Squad up
             </div>
           </div>
         </div>
