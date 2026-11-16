@@ -6,7 +6,7 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://kynexs.com",
   // Registration opening date. Override with NEXT_PUBLIC_LAUNCH_DATE (ISO 8601) without touching code.
   launchDate:
-    process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-11-22T18:00:00+05:00",
+    process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-12-19T18:00:00+05:00",
   nav: [
     { href: "#features", id: "features", label: "What's Coming" },
     { href: "#how", id: "how", label: "How It Works" },
@@ -21,9 +21,9 @@ export const siteConfig = {
       href: "https://www.facebook.com/people/Kynexs/61595220321099/",
     },
     { label: "Instagram", href: "https://www.instagram.com/kynexs/" },
+    { label: "WhatsApp", href: "https://wa.link/e2gzrw" },
     { label: "Discord", href: "#" },
-    { label: "WhatsApp", href: "#" },
-    { label: "X", href: "#" },
+    // { label: "X", href: "#" },
   ],
 } as const;
 
@@ -33,10 +33,16 @@ export type NavItem = (typeof siteConfig.nav)[number];
 
 /** Shown on the Payment step. Replace the placeholders with the real account. */
 export const bankDetails = {
-  accountTitle: "TEKNOFEST PAKISTAN",
-  bankName: "Meezan Bank",
-  accountNumber: "0156 0110120268",
-  iban: "PK43 MEZN 0001 5601 1012 0268",
+  bankName: "UBL Bank",
+  accountTitle: "SAMEY TAYYAB",
+  accountNumber: "1779 2838 84478",
+  iban: "PK81 UNIL 0109 0002 8388 4478",
+} as const;
+
+export const easypaisaDetails = {
+  walletName: "Easy paisa",
+  name: "SAMEY TAYYAB",
+  number: "03322445429",
 } as const;
 
 export const registrationDetails = {

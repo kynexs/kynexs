@@ -74,7 +74,7 @@ export default function Hero() {
               className="mt-5 flex animate-rise items-center gap-4 font-heading text-sm font-semibold tracking-[0.4em] text-white uppercase sm:text-base"
               style={enter(360)}
             >
-              <span className="h-px w-10 bg-lime" aria-hidden="true" />
+              {/* <span className="h-px w-10 bg-lime" aria-hidden="true" /> */}
               Karachi is waiting.
             </p>
 

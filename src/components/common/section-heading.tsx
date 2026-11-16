@@ -27,9 +27,9 @@ export default function SectionHeading({
             center && "justify-center",
           )}
         >
-          <span className="h-px w-8 bg-lime" aria-hidden="true" />
+          {/* <span className="h-px w-8 bg-lime" aria-hidden="true" /> */}
           {eyebrow}
-          {center && <span className="h-px w-8 bg-lime" aria-hidden="true" />}
+          {/* {center && <span className="h-px w-8 bg-lime" aria-hidden="true" />} */}
         </p>
       </Reveal>
       <Reveal delay={80}>

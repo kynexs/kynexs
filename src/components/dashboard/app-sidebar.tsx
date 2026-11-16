@@ -30,8 +30,8 @@ const navItems = [
   { title: "Overview", href: "/overview", icon: LayoutDashboard },
   { title: "Registration", href: "/registration", icon: ClipboardList },
   { title: "Matches", href: "/total-matches", icon: Swords },
-  { title: "Zones", href: "/gaming-zones", icon: Gamepad2 },
   { title: "Contacts", href: "/contacts", icon: Mail },
+  { title: "Zones", href: "/gaming-zones", icon: Gamepad2 },
 ] as const;
 
 export default function AppSidebar({
@@ -80,6 +80,20 @@ export default function AppSidebar({
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              {userRole === "admin" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={
+                      pathname === "/users" || pathname.startsWith("/users/")
+                    }
+                    tooltip="Users"
+                    render={<Link href="/users" />}
+                  >
+                    <Users />
+                    <span>Users</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               {navItems.map((item) => {
                 const active =
                   pathname === item.href ||
@@ -97,20 +111,6 @@ export default function AppSidebar({
                   </SidebarMenuItem>
                 );
               })}
-              {userRole === "admin" && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={
-                      pathname === "/users" || pathname.startsWith("/users/")
-                    }
-                    tooltip="Users"
-                    render={<Link href="/users" />}
-                  >
-                    <Users />
-                    <span>Users</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

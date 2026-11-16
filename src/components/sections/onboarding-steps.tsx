@@ -11,6 +11,7 @@ import type { ReceiptUpload } from "@/hooks/useReceiptUpload";
 import {
   bankDetails,
   confirmationMessage,
+  easypaisaDetails,
   registrationDetails,
   tournamentRules,
 } from "@/lib/config";
@@ -232,6 +233,12 @@ const bankRows = [
   ["IBAN", bankDetails.iban],
 ] as const;
 
+const easypaisaRows = [
+  ["Wallet name", easypaisaDetails.walletName],
+  ["Name", easypaisaDetails.name],
+  ["Number", easypaisaDetails.number],
+] as const;
+
 export function PaymentStep({
   receipt,
   error,
@@ -272,6 +279,34 @@ export function PaymentStep({
 
       <dl className="divide-y divide-white/10 border border-white/10 bg-surface-200/60">
         {bankRows.map(([label, value]) => (
+          <div
+            key={label}
+            className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+          >
+            <dt className="font-heading text-[11px] font-semibold tracking-[0.2em] text-text-muted uppercase">
+              {label}
+            </dt>
+            <dd className="font-heading text-sm font-semibold break-all text-white sm:text-right">
+              {value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div
+        className="flex items-center gap-3"
+        role="separator"
+        aria-label="Or pay with Easypaisa"
+      >
+        <span className="h-px flex-1 bg-white/10" />
+        <span className="font-heading text-[11px] font-semibold tracking-[0.25em] text-text-muted uppercase">
+          Or
+        </span>
+        <span className="h-px flex-1 bg-white/10" />
+      </div>
+
+      <dl className="divide-y divide-white/10 border border-white/10 bg-surface-200/60">
+        {easypaisaRows.map(([label, value]) => (
           <div
             key={label}
             className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"

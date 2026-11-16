@@ -10,7 +10,7 @@ export default function Contact() {
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div>
               <p className="mb-4 flex items-center gap-3 font-heading text-xs font-semibold tracking-[0.3em] text-lime uppercase">
-                <span className="h-px w-8 bg-lime" aria-hidden="true" />
+                {/* <span className="h-px w-8 bg-lime" aria-hidden="true" /> */}
                 Contact
               </p>
               <h2 className="font-display text-6xl leading-[0.85] font-extrabold tracking-tight uppercase sm:text-7xl">
