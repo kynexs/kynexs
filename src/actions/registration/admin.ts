@@ -54,7 +54,6 @@ export async function listRegistrations(): Promise<RegistrationRow[]> {
         contactAge: row.contactAge,
         contactArea: row.contactArea,
         status: row.status,
-        game: row.game,
         referralCodeEntered: row.referralCodeEntered,
         createdAt: row.createdAt.toISOString(),
         players: row.Player.map((player) => ({

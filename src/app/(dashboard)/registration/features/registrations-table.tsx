@@ -16,17 +16,8 @@ import DataTable, {
   type DataTableInstance,
 } from "@/components/data-table/data-table";
 import { features } from "@/components/data-table/data-table-features";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { RegistrationRow } from "@/types/registration";
 import { createRegistrationColumns } from "./columns";
-
-type GameFilter = "ALL" | "PUBG" | "FREE_FIRE";
 
 export default function RegistrationsTable({
   data,
@@ -38,7 +29,6 @@ export default function RegistrationsTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [gameFilter, setGameFilter] = useState<GameFilter>("ALL");
   const [dateRange, setDateRange] = useState<DateRangeValue>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -51,12 +41,8 @@ export default function RegistrationsTable({
   );
 
   const rows = useMemo(() => {
-    return data.filter((row) => {
-      if (gameFilter !== "ALL" && row.game !== gameFilter) return false;
-      if (!rowInDateRange(row.createdAt, dateRange)) return false;
-      return true;
-    });
-  }, [data, gameFilter, dateRange]);
+    return data.filter((row) => rowInDateRange(row.createdAt, dateRange));
+  }, [data, dateRange]);
 
   const table = useTable({
     features,
@@ -109,32 +95,6 @@ export default function RegistrationsTable({
           />
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <Select
-              value={gameFilter}
-              onValueChange={(value) => {
-                if (
-                  value === "ALL" ||
-                  value === "PUBG" ||
-                  value === "FREE_FIRE"
-                ) {
-                  setGameFilter(value);
-                  setPagination((current) => ({ ...current, pageIndex: 0 }));
-                }
-              }}
-            >
-              <SelectTrigger
-                className="h-10 w-[160px] bg-surface-200"
-                aria-label="Filter by game"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All games</SelectItem>
-                <SelectItem value="PUBG">PUBG</SelectItem>
-                <SelectItem value="FREE_FIRE">Free Fire</SelectItem>
-              </SelectContent>
-            </Select>
-
             <DateRangeFilter
               value={dateRange}
               onChange={(next) => {

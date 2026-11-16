@@ -80,7 +80,6 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
         contactAge: data.igl.age,
         contactArea: data.igl.area,
         agreementsAccepted: true,
-        game: data.game,
         gamingZoneId,
         referralCodeEntered: data.referralCode,
         updatedAt: new Date(),

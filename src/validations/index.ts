@@ -22,7 +22,7 @@ export {
   normalizeReferralCode,
   PLAYER_COUNT,
   SLIP_TYPES,
-  validateGameAndReferral,
+  validateReferral,
   validateIgl,
   validateRegistration,
   validateSlip,

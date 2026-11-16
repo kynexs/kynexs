@@ -8,11 +8,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Game {
-  PUBG
-  FREE_FIRE
-}
-
 enum ContactStatus {
   UNREPLIED
   REPLIED
@@ -90,7 +85,6 @@ model Registration {
   contactArea         String
   agreementsAccepted  Boolean
   status              RegistrationStatus @default(PENDING)
-  game                Game               @default(PUBG)
   gamingZoneId        String?
   referralCodeEntered String?
   createdAt           DateTime           @default(now())
@@ -101,7 +95,6 @@ model Registration {
 
   @@index([contactEmail])
   @@index([status, createdAt])
-  @@index([game, createdAt])
   @@index([gamingZoneId])
   @@index([createdAt])
 }

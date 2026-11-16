@@ -32,12 +32,6 @@ export function createRegistrationColumns(canDelete: boolean) {
       ),
       filterFn: "includesString",
     }),
-    columnHelper.accessor("game", {
-      id: "game",
-      header: "Game",
-      cell: ({ getValue }) =>
-        getValue() === "FREE_FIRE" ? "Free Fire" : "PUBG",
-    }),
     columnHelper.accessor("contactWhatsapp", {
       id: "contactWhatsapp",
       header: "Phone Number",

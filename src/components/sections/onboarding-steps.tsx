@@ -7,13 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { ReceiptUpload } from "@/hooks/useReceiptUpload";
 import {
   bankDetails,
@@ -24,7 +17,6 @@ import {
 import { cn } from "@/lib/utils";
 import type {
   FormErrors,
-  GameChoice,
   IglDetails,
   PlayerDetails,
   TeamDetails,
@@ -126,18 +118,10 @@ export function IglStep({
   value,
   errors,
   onChange,
-  game,
-  onGameChange,
-  referralCode,
-  onReferralChange,
 }: {
   value: IglDetails;
   errors: FormErrors;
   onChange: (field: keyof IglDetails, value: string) => void;
-  game: GameChoice | "";
-  onGameChange: (game: GameChoice) => void;
-  referralCode: string;
-  onReferralChange: (value: string) => void;
 }) {
   const field = (
     kind: keyof IglDetails,
@@ -161,62 +145,7 @@ export function IglStep({
       {field("age", "off")}
       {field("email", "email", "sm:col-span-2")}
       {field("area", "off", "sm:col-span-2")}
-      <div className="sm:col-span-2">
-        <Label
-          htmlFor="referralCode"
-          className="mb-2 text-sm font-medium text-text-secondary"
-        >
-          Referral code{" "}
-          <span className="font-normal text-text-muted">(optional)</span>
-        </Label>
-        <Input
-          id="referralCode"
-          name="referralCode"
-          value={referralCode}
-          placeholder="Gaming zone referral code"
-          maxLength={32}
-          autoComplete="off"
-          aria-invalid={errors.referralCode ? true : undefined}
-          className={fieldClass}
-          onChange={(e) => onReferralChange(e.target.value)}
-        />
-        {errors.referralCode && (
-          <p role="alert" className="mt-2 text-sm text-status-danger">
-            {errors.referralCode}
-          </p>
-        )}
-      </div>
-      <div className="sm:col-span-2">
-        <Label
-          htmlFor="game"
-          className="mb-2 text-sm font-medium text-text-secondary"
-        >
-          Select game
-        </Label>
-        <Select
-          value={game || undefined}
-          onValueChange={(next) => {
-            if (next === "PUBG" || next === "FREE_FIRE") onGameChange(next);
-          }}
-        >
-          <SelectTrigger
-            id="game"
-            className={cn(fieldClass, "w-full")}
-            aria-invalid={errors.game ? true : undefined}
-          >
-            <SelectValue placeholder="PUBG or Free Fire" />
-          </SelectTrigger>
-          <SelectContent alignItemWithTrigger={false} sideOffset={6}>
-            <SelectItem value="PUBG">PUBG</SelectItem>
-            <SelectItem value="FREE_FIRE">Free Fire</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.game && (
-          <p role="alert" className="mt-2 text-sm text-status-danger">
-            {errors.game}
-          </p>
-        )}
-      </div>
+      {/* TODO -- Update Referral in Future */}
     </div>
   );
 }
@@ -297,8 +226,8 @@ export function TeamStep({
 }
 
 const bankRows = [
-  ["Account title", bankDetails.accountTitle],
   ["Bank name", bankDetails.bankName],
+  ["Account title", bankDetails.accountTitle],
   ["Account number", bankDetails.accountNumber],
   ["IBAN", bankDetails.iban],
 ] as const;

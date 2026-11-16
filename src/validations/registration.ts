@@ -2,7 +2,6 @@
 import { parseReceiptKey } from "@/lib/receipt";
 import type {
   FormErrors,
-  GameChoice,
   IglDetails,
   PlayerDetails,
   RegistrationData,
@@ -116,13 +115,9 @@ export function detectSlipType(bytes: Uint8Array): SlipType | null {
   return null;
 }
 
-export function validateGameAndReferral(raw: unknown): FormErrors {
+export function validateReferral(raw: unknown): FormErrors {
   const input = obj(raw);
   const errors: FormErrors = {};
-  const game = str(input.game);
-  if (game !== "PUBG" && game !== "FREE_FIRE") {
-    errors.game = "Select a game.";
-  }
   const referral = str(input.referralCode);
   if (referral && referral.length > 32) {
     errors.referralCode = "Referral code is too long.";
@@ -142,7 +137,7 @@ export function validateRegistration(
   const errors: FormErrors = {
     ...validateIgl(input.igl),
     ...validateTeam(input),
-    ...validateGameAndReferral(input),
+    ...validateReferral(input),
   };
   if (input.agreementsAccepted !== true)
     errors.agreementsAccepted = "You must accept all tournament rules.";
@@ -166,8 +161,6 @@ export function validateRegistration(
       };
     });
 
-  const game = str(input.game) as GameChoice;
-
   return {
     ok: true,
     data: {
@@ -175,7 +168,6 @@ export function validateRegistration(
       receiptKey: String(input.receiptKey),
       receiptFileName: receipt.fileName,
       teamName: str(input.teamName),
-      game,
       referralCode: normalizeReferralCode(input.referralCode),
       igl: {
         fullName: str(igl.fullName),

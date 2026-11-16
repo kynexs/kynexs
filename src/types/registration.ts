@@ -21,13 +21,10 @@ export type PlayerDetails = {
 export type TeamDetails = { teamName: string; players: PlayerDetails[] };
 
 /** What the form sends as JSON. `receiptKey` comes from /api/upload. Ages stay strings until validated. */
-export type GameChoice = "PUBG" | "FREE_FIRE";
-
 export type RegistrationInput = TeamDetails & {
   igl: IglDetails;
   agreementsAccepted: boolean;
   receiptKey: string;
-  game: GameChoice;
   referralCode?: string;
 };
 
@@ -40,7 +37,6 @@ export type RegistrationData = {
   receiptKey: string;
   receiptFileName: string;
   teamName: string;
-  game: GameChoice;
   referralCode: string | null;
   igl: {
     fullName: string;
@@ -89,7 +85,6 @@ export type RegistrationRow = {
   contactAge: number;
   contactArea: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
-  game: "PUBG" | "FREE_FIRE";
   referralCodeEntered: string | null;
   createdAt: string;
   players: RegistrationPlayer[];

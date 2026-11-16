@@ -4,7 +4,7 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; // same rule as validation.ts
 
 export const MIN_AGE = 13;
-export const MAX_AGE = 60;
+export const MAX_AGE = 21;
 
 export const str = (raw: unknown): string =>
   typeof raw === "string" ? raw.trim() : "";

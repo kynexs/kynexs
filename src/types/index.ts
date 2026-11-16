@@ -9,7 +9,6 @@ export type {
 export type { GamingZoneRow, GamingZoneStats } from "./gaming-zones";
 export type {
   FormErrors,
-  GameChoice,
   IglDetails,
   PlayerDetails,
   RegistrationData,
