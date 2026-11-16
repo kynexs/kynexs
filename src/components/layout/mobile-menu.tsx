@@ -118,7 +118,7 @@ export default function MobileMenu({
               window.location.hash = "join";
             }}
           >
-            Pre Registration
+            Registration
             <Icon name="arrowRight" className="size-5" />
           </Button>
           <p className="mt-4 text-center font-heading text-[11px] tracking-[0.3em] text-white/40 uppercase">

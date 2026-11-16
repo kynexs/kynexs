@@ -174,7 +174,7 @@ export function TeamStep({
         <Input
           id="teamName"
           name="teamName"
-          placeholder="e.g. Karachi Kings"
+          placeholder="e.g. 4T, I8, FLCN"
           maxLength={40}
           autoComplete="off"
           value={value.teamName}

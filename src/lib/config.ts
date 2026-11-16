@@ -11,7 +11,7 @@ export const siteConfig = {
     { href: "#features", id: "features", label: "What's Coming" },
     { href: "#how", id: "how", label: "How It Works" },
     { href: "#squad", id: "squad", label: "Players" },
-    { href: "#join", id: "join", label: "Pre Registration" },
+    { href: "#join", id: "join", label: "" },
   ],
   // Add real URLs here; entries without an href render as "soon" chips.
   // Todo -- Add real WhatsApp number and Facebook page URL.

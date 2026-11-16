@@ -202,8 +202,8 @@ export default function Onboarding({
             <header className="relative flex items-start justify-between gap-4 px-5 pt-6 pb-4 sm:px-8">
               <div>
                 <p className="mb-2 flex items-center gap-3 font-heading text-[11px] font-semibold tracking-[0.3em] text-lime uppercase">
-                  <span className="h-px w-6 bg-lime" aria-hidden="true" />
-                  Pre Registration
+                  {/* <span className="h-px w-6 bg-lime" aria-hidden="true" /> */}
+                  Registration
                 </p>
                 <DialogTitle className="font-display text-3xl leading-none font-extrabold uppercase sm:text-4xl">
                   {current?.title}
