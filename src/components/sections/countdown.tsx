@@ -81,7 +81,7 @@ export default function Countdown({
       </div>
       {label && (
         <p className="mt-3 font-heading text-[11px] tracking-[0.25em] text-text-muted uppercase">
-          Registrations open {label}
+          MATCH DAY: {label}
         </p>
       )}
     </div>

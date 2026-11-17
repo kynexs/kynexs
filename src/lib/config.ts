@@ -2,11 +2,11 @@ export const siteConfig = {
   name: "Kynexs",
   tagline: "The Next Generation",
   description:
-    "The next generation of competitive gaming is coming. Build your squad, drop in and prove yourself on the biggest stage. Registrations opening soon.",
+    "The next generation of competitive gaming is coming. Build your squad, drop in and prove yourself on the biggest stage. The countdown to match day is on.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://kynexs.com",
   // Registration opening date. Override with NEXT_PUBLIC_LAUNCH_DATE (ISO 8601) without touching code.
   launchDate:
-    process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-12-19T18:00:00+05:00",
+    process.env.NEXT_PUBLIC_LAUNCH_DATE ?? "2026-12-19T16:00:00+05:00",
   nav: [
     { href: "#features", id: "features", label: "What's Coming" },
     { href: "#how", id: "how", label: "How It Works" },
@@ -63,3 +63,8 @@ export const tournamentRules = [
 
 export const confirmationMessage =
   "We have received your details. Your pass will be sent to your WhatsApp number or email within 10-12 hours.";
+
+export const supportContact = {
+  email: process.env.OWNER_EMAIL ?? "kynexscomp@gmail.com",
+  whatsapp: process.env.SUPPORT_WHATSAPP ?? "+923253376352",
+} as const;

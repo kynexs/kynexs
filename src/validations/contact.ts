@@ -30,7 +30,7 @@ export function validateContactField(
     case "email":
       return validateEmail(raw);
     case "phone":
-      return str(raw) ? validatePhone(raw, "Phone number") : null; // optional
+      return validatePhone(raw, "Phone number");
     case "message":
       return validateText(raw, "Message", 10, 1000);
     default: {

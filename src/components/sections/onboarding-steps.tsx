@@ -56,7 +56,7 @@ const FIELD_PROPS = {
   },
   area: {
     label: "Area",
-    placeholder: "e.g. Gulshan-e-Iqbal, Karachi",
+    placeholder: "e.g. Block A - North Nazimabad, Karachi",
     maxLength: 80,
   },
   pubgName: { label: "PUBG name", placeholder: "In-game name", maxLength: 32 },

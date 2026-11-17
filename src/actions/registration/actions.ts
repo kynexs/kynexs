@@ -3,10 +3,16 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { revalidatePath } from "next/cache";
+import {
+  OWNER_EMAIL,
+  registrationConfirmationEmail,
+  registrationOwnerEmail,
+} from "@/emails/registration";
 import { buildReceiptKey, parseReceiptKey } from "@/lib/receipt";
 import { assertCan } from "@/services/auth/permissions";
 import { getSession } from "@/services/auth/session";
 import { prisma } from "@/services/prisma";
+import { sendEmails } from "@/services/resend";
 import { deleteObject, s3, storageBucket } from "@/services/s3";
 import type { RegistrationInput } from "@/types/registration";
 import {
@@ -43,26 +49,42 @@ export async function uploadReceiptFile(formData: FormData): Promise<string> {
 }
 
 export async function registerSquad(input: RegistrationInput): Promise<void> {
+  const isDev = process.env.NODE_ENV === "development";
+  const log = (...args: unknown[]) => {
+    if (isDev) console.log("[registerSquad]", ...args);
+  };
+
+  log("1/6 validate input");
   const result = validateRegistration(input);
   if (!result.ok) {
     const message =
       Object.values(result.errors)[0] ?? "Check the form and try again.";
+    log("validation failed", result.errors);
     throw new Error(message);
   }
 
   const data = result.data;
+  log("2/6 parse receipt", {
+    registrationId: data.registrationId,
+    teamName: data.teamName,
+    iglEmail: data.igl.email,
+  });
   const parsed = parseReceiptKey(data.receiptKey);
   if (!parsed) throw new Error("Upload your payment slip.");
 
   let gamingZoneId: string | null = null;
   if (data.referralCode) {
+    log("3/6 resolve referral", data.referralCode);
     const zone = await prisma.gamingZone.findUnique({
       where: { referralCode: data.referralCode },
     });
     if (!zone) throw new Error("Invalid referral code.");
     gamingZoneId = zone.id;
+  } else {
+    log("3/6 no referral code");
   }
 
+  log("4/6 sign receipt url");
   const fileUrl = await getSignedUrl(
     s3,
     new GetObjectCommand({ Bucket: storageBucket(), Key: data.receiptKey }),
@@ -70,6 +92,7 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
   );
 
   try {
+    log("5/6 save registration to db");
     await prisma.registration.create({
       data: {
         id: data.registrationId,
@@ -107,9 +130,46 @@ export async function registerSquad(input: RegistrationInput): Promise<void> {
         },
       },
     });
+    log("5/6 db save ok", data.registrationId);
   } catch (error) {
     console.error("registration failed", error);
     throw new Error("Couldn't save your squad. Try again in a moment.");
+  }
+
+  const emailPayload = {
+    teamName: data.teamName,
+    players: data.players,
+  };
+  const playerMail = registrationConfirmationEmail(emailPayload);
+  const ownerMail = registrationOwnerEmail(emailPayload);
+
+  // Squad form only collects the IGL email — one confirmation covers all four players.
+  try {
+    log("6/6 send emails", {
+      playerTo: data.igl.email,
+      ownerTo: OWNER_EMAIL,
+      playerSubject: playerMail.subject,
+      ownerSubject: ownerMail.subject,
+    });
+    await sendEmails(
+      [
+        {
+          to: data.igl.email,
+          subject: playerMail.subject,
+          html: playerMail.html,
+        },
+        {
+          to: OWNER_EMAIL,
+          subject: ownerMail.subject,
+          html: ownerMail.html,
+        },
+      ],
+      `registration/${data.registrationId}`,
+    );
+    log("6/6 emails sent ok");
+  } catch (error) {
+    console.error("registration emails failed", error);
+    log("6/6 emails failed", error);
   }
 }
 

@@ -137,7 +137,7 @@ export default function ContactForm() {
           />
         </Field>
       </div>
-      <Field label="Phone (optional)" error={error("phone")}>
+      <Field label="Phone" error={error("phone")}>
         <Input
           type="tel"
           inputMode="tel"
