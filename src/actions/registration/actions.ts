@@ -30,15 +30,15 @@ import {
 
 const isDev = process.env.NODE_ENV === "development";
 
-async function assertEmailAvailable(email: string): Promise<string | null> {
+async function assertEmailAvailable(email: string): Promise<void> {
   const existing = await prisma.registration.findFirst({
     where: { contactEmail: email },
     select: { id: true },
   });
-  return existing ? "This email is already registered." : null;
+  if (existing) {
+    throw new Error("This email is already registered.");
+  }
 }
-
-type ActionResult = { ok: true } | { ok: false; error: string };
 
 async function saveRegistration(
   data: RegistrationData,
@@ -113,58 +113,43 @@ async function sendRegistrationEmails(data: RegistrationData): Promise<void> {
   );
 }
 
-export async function uploadReceiptFile(
-  formData: FormData,
-): Promise<{ ok: true; key: string } | { ok: false; error: string }> {
+export async function uploadReceiptFile(formData: FormData): Promise<string> {
   const ip = await clientIp();
-  const limited = await assertRateLimit("upload", ip);
-  if (limited) return { ok: false, error: limited };
+  await assertRateLimit("upload", ip);
 
   const file = formData.get("file");
-  if (!(file instanceof File)) {
-    return { ok: false, error: "Upload your payment slip." };
-  }
+  if (!(file instanceof File)) throw new Error("Upload your payment slip.");
   const invalid = validateSlip(file);
-  if (invalid) return { ok: false, error: invalid };
+  if (invalid) throw new Error(invalid);
 
   const bytes = new Uint8Array(await file.arrayBuffer());
   const detected = detectSlipType(bytes);
-  if (!detected) {
-    return { ok: false, error: "Slip must be a JPG, PNG, WebP or PDF file." };
-  }
+  if (!detected) throw new Error("Slip must be a JPG, PNG, WebP or PDF file.");
 
-  try {
-    const id = crypto.randomUUID();
-    const key = buildReceiptKey(id, {
-      name: file.name,
-      size: file.size,
-      type: detected,
-    });
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: storageBucket(),
-        Key: key,
-        Body: bytes,
-        ContentType: detected,
-      }),
-    );
-    return { ok: true, key };
-  } catch (error) {
-    console.error("receipt upload failed", error);
-    return { ok: false, error: "Upload failed. Please try again." };
-  }
+  const id = crypto.randomUUID();
+  const key = buildReceiptKey(id, {
+    name: file.name,
+    size: file.size,
+    type: detected,
+  });
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: storageBucket(),
+      Key: key,
+      Body: bytes,
+      ContentType: detected,
+    }),
+  );
+  return key;
 }
 
-export async function registerSquad(
-  input: RegistrationInput,
-): Promise<ActionResult> {
+export async function registerSquad(input: RegistrationInput): Promise<void> {
   const log = (...args: unknown[]) => {
     if (isDev) console.log("[registerSquad]", ...args);
   };
 
   const ip = await clientIp();
-  const limited = await assertRateLimit("registration", ip);
-  if (limited) return { ok: false, error: limited };
+  await assertRateLimit("registration", ip);
 
   log("1/6 validate input");
   const result = validateRegistration(input);
@@ -172,12 +157,11 @@ export async function registerSquad(
     const message =
       Object.values(result.errors)[0] ?? "Check the form and try again.";
     log("validation failed", result.errors);
-    return { ok: false, error: message };
+    throw new Error(message);
   }
 
   const data = result.data;
-  const emailTaken = await assertEmailAvailable(data.igl.email);
-  if (emailTaken) return { ok: false, error: emailTaken };
+  await assertEmailAvailable(data.igl.email);
 
   log("2/6 parse receipt", {
     registrationId: data.registrationId,
@@ -185,7 +169,7 @@ export async function registerSquad(
     iglEmail: data.igl.email,
   });
   const parsed = parseReceiptKey(data.receiptKey);
-  if (!parsed) return { ok: false, error: "Upload your payment slip." };
+  if (!parsed) throw new Error("Upload your payment slip.");
 
   let gamingZoneId: string | null = null;
   if (data.referralCode) {
@@ -193,24 +177,18 @@ export async function registerSquad(
     const zone = await prisma.gamingZone.findUnique({
       where: { referralCode: data.referralCode },
     });
-    if (!zone) return { ok: false, error: "Invalid referral code." };
+    if (!zone) throw new Error("Invalid referral code.");
     gamingZoneId = zone.id;
   } else {
     log("3/6 no referral code");
   }
 
   log("4/6 sign receipt url");
-  let fileUrl: string;
-  try {
-    fileUrl = await getSignedUrl(
-      s3,
-      new GetObjectCommand({ Bucket: storageBucket(), Key: data.receiptKey }),
-      { expiresIn: 60 * 60 * 24 * 7 },
-    );
-  } catch (error) {
-    console.error("receipt sign failed", error);
-    return { ok: false, error: "Couldn't verify your payment slip. Try again." };
-  }
+  const fileUrl = await getSignedUrl(
+    s3,
+    new GetObjectCommand({ Bucket: storageBucket(), Key: data.receiptKey }),
+    { expiresIn: 60 * 60 * 24 * 7 },
+  );
 
   try {
     log("5/6 save registration to db");
@@ -218,10 +196,7 @@ export async function registerSquad(
     log("5/6 db save ok", data.registrationId);
   } catch (error) {
     console.error("registration failed", error);
-    return {
-      ok: false,
-      error: "Couldn't save your squad. Try again in a moment.",
-    };
+    throw new Error("Couldn't save your squad. Try again in a moment.");
   }
 
   try {
@@ -232,20 +207,17 @@ export async function registerSquad(
     console.error("registration emails failed", error);
     log("6/6 emails failed", error);
   }
-
-  return { ok: true };
 }
 
 export async function registerIndividual(
   input: IndividualInput,
-): Promise<ActionResult> {
+): Promise<void> {
   const log = (...args: unknown[]) => {
     if (isDev) console.log("[registerIndividual]", ...args);
   };
 
   const ip = await clientIp();
-  const limited = await assertRateLimit("registration", ip);
-  if (limited) return { ok: false, error: limited };
+  await assertRateLimit("registration", ip);
 
   log("1/5 validate input");
   const result = validateIndividualRegistration(input);
@@ -253,28 +225,21 @@ export async function registerIndividual(
     const message =
       Object.values(result.errors)[0] ?? "Check the form and try again.";
     log("validation failed", result.errors);
-    return { ok: false, error: message };
+    throw new Error(message);
   }
 
   const data = result.data;
-  const emailTaken = await assertEmailAvailable(data.igl.email);
-  if (emailTaken) return { ok: false, error: emailTaken };
+  await assertEmailAvailable(data.igl.email);
 
   const parsed = parseReceiptKey(data.receiptKey);
-  if (!parsed) return { ok: false, error: "Upload your payment slip." };
+  if (!parsed) throw new Error("Upload your payment slip.");
 
   log("2/5 sign receipt url");
-  let fileUrl: string;
-  try {
-    fileUrl = await getSignedUrl(
-      s3,
-      new GetObjectCommand({ Bucket: storageBucket(), Key: data.receiptKey }),
-      { expiresIn: 60 * 60 * 24 * 7 },
-    );
-  } catch (error) {
-    console.error("receipt sign failed", error);
-    return { ok: false, error: "Couldn't verify your payment slip. Try again." };
-  }
+  const fileUrl = await getSignedUrl(
+    s3,
+    new GetObjectCommand({ Bucket: storageBucket(), Key: data.receiptKey }),
+    { expiresIn: 60 * 60 * 24 * 7 },
+  );
 
   try {
     log("3/5 save registration to db");
@@ -282,10 +247,7 @@ export async function registerIndividual(
     log("4/5 db save ok", data.registrationId);
   } catch (error) {
     console.error("individual registration failed", error);
-    return {
-      ok: false,
-      error: "Couldn't save your registration. Try again in a moment.",
-    };
+    throw new Error("Couldn't save your registration. Try again in a moment.");
   }
 
   try {
@@ -296,8 +258,6 @@ export async function registerIndividual(
     console.error("registration emails failed", error);
     log("5/5 emails failed", error);
   }
-
-  return { ok: true };
 }
 
 const REGISTRATION_STATUSES: RegistrationStatus[] = [

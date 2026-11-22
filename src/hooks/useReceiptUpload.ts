@@ -54,24 +54,18 @@ export function useReceiptUpload() {
     const formData = new FormData();
     formData.set("file", file);
     uploadReceiptFile(formData).then(
-      (result) => {
+      (key) => {
         if (cancelled) return;
-        if (!result.ok) {
-          patch({ status: "error", error: result.error });
-          return;
-        }
-        patch({
-          key: result.key,
-          status: "done",
-          progress: 100,
-          error: undefined,
-        });
+        patch({ key, status: "done", progress: 100, error: undefined });
       },
-      () => {
+      (err: unknown) => {
         if (cancelled) return;
         patch({
           status: "error",
-          error: "Upload failed. Please try again.",
+          error:
+            err instanceof Error
+              ? err.message
+              : "Upload failed. Please try again.",
         });
       },
     );

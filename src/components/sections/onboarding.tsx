@@ -174,27 +174,26 @@ export default function Onboarding({
     setStatus("loading");
     setServerError("");
     try {
-      const result = isIndividual
-        ? await registerIndividual({
-            player: individual,
-            agreementsAccepted: true,
-            receiptKey: receipt.key,
-          })
-        : await registerSquad({
-            igl,
-            ...team,
-            agreementsAccepted: true,
-            receiptKey: receipt.key,
-          });
-      if (!result.ok) {
-        setServerError(result.error);
-        setStatus("error");
-        return;
+      if (isIndividual) {
+        await registerIndividual({
+          player: individual,
+          agreementsAccepted: true,
+          receiptKey: receipt.key,
+        });
+      } else {
+        await registerSquad({
+          igl,
+          ...team,
+          agreementsAccepted: true,
+          receiptKey: receipt.key,
+        });
       }
       setStatus("idle");
       go(last);
-    } catch {
-      setServerError("Something went wrong. Try again.");
+    } catch (err) {
+      setServerError(
+        err instanceof Error ? err.message : "Something went wrong. Try again.",
+      );
       setStatus("error");
     }
   };
