@@ -5,6 +5,7 @@ export type SlipType =
   | "application/pdf";
 
 export type RegistrationType = "INDIVIDUAL" | "SQUAD";
+export type RegistrationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export type IglDetails = {
   fullName: string;
@@ -103,7 +104,7 @@ export type RegistrationRow = {
   contactEmail: string;
   contactAge: number;
   contactArea: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: RegistrationStatus;
   type: RegistrationType;
   fee: number;
   referralCodeEntered: string | null;

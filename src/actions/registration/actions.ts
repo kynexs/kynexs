@@ -19,6 +19,7 @@ import type {
   IndividualInput,
   RegistrationData,
   RegistrationInput,
+  RegistrationStatus,
 } from "@/types/registration";
 import {
   detectSlipType,
@@ -256,6 +257,46 @@ export async function registerIndividual(
   } catch (error) {
     console.error("registration emails failed", error);
     log("5/5 emails failed", error);
+  }
+}
+
+const REGISTRATION_STATUSES: RegistrationStatus[] = [
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+];
+
+export async function updateRegistrationStatus(
+  registrationId: string,
+  status: RegistrationStatus,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: "Unauthorized" };
+
+  const id = registrationId?.trim();
+  if (!id || id.length < 8 || id.length > 80) {
+    return { ok: false, error: "Invalid registration id." };
+  }
+  if (!REGISTRATION_STATUSES.includes(status)) {
+    return { ok: false, error: "Invalid registration status." };
+  }
+
+  try {
+    const existing = await prisma.registration.findUnique({ where: { id } });
+    if (!existing) return { ok: false, error: "Registration not found." };
+
+    await prisma.registration.update({
+      where: { id },
+      data: { status, updatedAt: new Date() },
+    });
+    revalidatePath("/registration");
+    return { ok: true };
+  } catch (error) {
+    console.error("update registration status failed", error);
+    return {
+      ok: false,
+      error: "Couldn't update registration status. Try again.",
+    };
   }
 }
 

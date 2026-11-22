@@ -4,6 +4,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import type { DataTableFeatures } from "@/components/data-table/data-table-features";
 import { formatAppDate } from "@/lib/format";
 import type { RegistrationRow } from "@/types/registration";
+import RegistrationStatusBadge from "./registration-status-badge";
 import RegistrationRowActions from "./row-actions";
 import SlipThumbnail from "./slip-thumbnail";
 
@@ -44,9 +45,14 @@ export function createRegistrationColumns(canDelete: boolean) {
     }),
     columnHelper.accessor("type", {
       id: "type",
-      header: "Status",
+      header: "Type",
       cell: ({ getValue }) =>
         getValue() === "INDIVIDUAL" ? "Individual" : "Squad",
+    }),
+    columnHelper.accessor("status", {
+      id: "status",
+      header: "Registration Status",
+      cell: ({ getValue }) => <RegistrationStatusBadge status={getValue()} />,
     }),
     columnHelper.display({
       id: "slip",

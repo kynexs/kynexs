@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { RegistrationRow } from "@/types/registration";
+import RegistrationStatusBadge from "./registration-status-badge";
 import { isImageSlip } from "./slip-thumbnail";
 
 export default function RegistrationDetailSheet({
@@ -48,6 +49,12 @@ export default function RegistrationDetailSheet({
                   registration.type === "INDIVIDUAL" ? "Individual" : "Squad"
                 }
               />
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-muted-foreground">Registration status</dt>
+                <dd>
+                  <RegistrationStatusBadge status={registration.status} />
+                </dd>
+              </div>
               <Row label="Name" value={registration.contactName} />
               <Row label="Phone" value={registration.contactWhatsapp} />
               {registration.type === "SQUAD" && (

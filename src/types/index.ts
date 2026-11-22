@@ -19,6 +19,7 @@ export type {
   RegistrationReceipt,
   RegistrationRow,
   RegistrationStats,
+  RegistrationStatus,
   RegistrationType,
   SlipType,
   TeamDetails,

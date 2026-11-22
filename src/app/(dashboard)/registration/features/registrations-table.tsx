@@ -23,10 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { RegistrationRow, RegistrationType } from "@/types/registration";
+import type {
+  RegistrationRow,
+  RegistrationStatus,
+  RegistrationType,
+} from "@/types/registration";
 import { createRegistrationColumns } from "./columns";
 
 type TypeFilter = "ALL" | RegistrationType;
+type StatusFilter = "ALL" | RegistrationStatus;
 
 export default function RegistrationsTable({
   data,
@@ -39,6 +44,7 @@ export default function RegistrationsTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [dateRange, setDateRange] = useState<DateRangeValue>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -53,10 +59,11 @@ export default function RegistrationsTable({
   const rows = useMemo(() => {
     return data.filter((row) => {
       if (typeFilter !== "ALL" && row.type !== typeFilter) return false;
+      if (statusFilter !== "ALL" && row.status !== statusFilter) return false;
       if (!rowInDateRange(row.createdAt, dateRange)) return false;
       return true;
     });
-  }, [data, typeFilter, dateRange]);
+  }, [data, typeFilter, statusFilter, dateRange]);
 
   const table = useTable({
     features,
@@ -123,7 +130,7 @@ export default function RegistrationsTable({
               }}
             >
               <SelectTrigger
-                className="h-10 w-[180px] bg-surface-200"
+                className="h-10 w-45 bg-surface-200"
                 aria-label="Filter by registration type"
               >
                 <SelectValue />
@@ -132,6 +139,34 @@ export default function RegistrationsTable({
                 <SelectItem value="ALL">All types</SelectItem>
                 <SelectItem value="INDIVIDUAL">Individual</SelectItem>
                 <SelectItem value="SQUAD">Squad</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => {
+                if (
+                  value === "ALL" ||
+                  value === "PENDING" ||
+                  value === "APPROVED" ||
+                  value === "REJECTED"
+                ) {
+                  setStatusFilter(value);
+                  setPagination((current) => ({ ...current, pageIndex: 0 }));
+                }
+              }}
+            >
+              <SelectTrigger
+                className="h-10 w-45 bg-surface-200"
+                aria-label="Filter by registration status"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All statuses</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="REJECTED">Rejected</SelectItem>
               </SelectContent>
             </Select>
 
