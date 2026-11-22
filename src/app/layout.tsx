@@ -25,7 +25,7 @@ const display = Barlow_Condensed({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: `${siteConfig.name} | Registrations opening soon`,
+  title: `${siteConfig.name} | Registrations are opened`,
   description: siteConfig.description,
   openGraph: {
     title: `${siteConfig.name} | ${siteConfig.tagline}`,

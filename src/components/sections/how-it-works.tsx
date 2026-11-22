@@ -17,15 +17,15 @@ export default function HowItWorks() {
           eyebrow="How it works"
           title={
             <>
-              Five steps to <span className="text-lime">the drop</span>
+              Four steps to <span className="text-lime">the drop</span>
             </>
           }
-          description="From sign-up to leaderboard. No paperwork, no waiting around."
+          description="From registration to leaderboard. No paperwork, no waiting around."
         />
 
         <ol
           ref={ref}
-          className="relative mt-16 grid gap-10 lg:grid-cols-5 lg:gap-6"
+          className="relative mt-16 grid gap-10 lg:grid-cols-4 lg:gap-6"
         >
           <span
             aria-hidden="true"

@@ -2,7 +2,10 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { useRef, useState } from "react";
-import { registerSquad } from "@/actions/registration/actions";
+import {
+  registerIndividual,
+  registerSquad,
+} from "@/actions/registration/actions";
 import Icon from "@/components/common/icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,19 +17,27 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useReceiptUpload } from "@/hooks/useReceiptUpload";
-import { tournamentRules } from "@/lib/config";
+import {
+  individualTournamentRules,
+  registrationDetails,
+  tournamentRules,
+} from "@/lib/config";
 import { cn } from "@/lib/utils";
 import type {
   FormErrors,
   IglDetails,
+  IndividualDetails,
   PlayerDetails,
+  RegistrationType,
   TeamDetails,
 } from "@/types/registration";
 import {
   emptyIgl,
+  emptyIndividual,
   emptyPlayer,
   PLAYER_COUNT,
   validateIgl,
+  validateIndividualPlayer,
   validateTeam,
 } from "@/validations/registration";
 
@@ -34,11 +45,12 @@ import {
   AgreementsStep,
   ConfirmationStep,
   IglStep,
+  IndividualStep,
   PaymentStep,
   TeamStep,
 } from "./onboarding-steps";
 
-const STEPS = [
+const SQUAD_STEPS = [
   {
     title: "Squad leader",
     subtitle: "Your IGL is the main contact for the squad.",
@@ -55,29 +67,51 @@ const STEPS = [
   { title: "All set", subtitle: "Your registration is in." },
 ] as const;
 
-const LAST = STEPS.length - 1;
+const INDIVIDUAL_STEPS = [
+  {
+    title: "Your details",
+    subtitle: "Tell us who you are and your PUBG ID.",
+  },
+  { title: "Payment", subtitle: "Pay Rs 500, then upload your slip." },
+  {
+    title: "Tournament rules",
+    subtitle: "Accept every rule to complete registration.",
+  },
+  { title: "All set", subtitle: "Your registration is in." },
+] as const;
 
 const newTeam = (): TeamDetails => ({
   teamName: "",
   players: Array.from({ length: PLAYER_COUNT }, emptyPlayer),
 });
-const noRulesAccepted = () => tournamentRules.map(() => false);
 
 type Status = "idle" | "loading" | "error";
 
 export default function Onboarding({
   open,
   onClose,
+  mode,
 }: {
   open: boolean;
   onClose: () => void;
+  mode: RegistrationType;
 }) {
+  const isIndividual = mode === "INDIVIDUAL";
+  const steps = isIndividual ? INDIVIDUAL_STEPS : SQUAD_STEPS;
+  const rules = isIndividual ? individualTournamentRules : tournamentRules;
+  const last = steps.length - 1;
+  const paymentStep = isIndividual ? 1 : 2;
+  const rulesStep = isIndividual ? 2 : 3;
+
   const [step, setStep] = useState(0);
   const [igl, setIgl] = useState<IglDetails>(emptyIgl);
   const [team, setTeam] = useState<TeamDetails>(newTeam);
+  const [individual, setIndividual] = useState<IndividualDetails>(emptyIndividual);
   // TODO -- Update Referral in Future
   const receipt = useReceiptUpload();
-  const [accepted, setAccepted] = useState<boolean[]>(noRulesAccepted);
+  const [accepted, setAccepted] = useState<boolean[]>(() =>
+    rules.map(() => false),
+  );
   const [showErrors, setShowErrors] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [serverError, setServerError] = useState("");
@@ -92,13 +126,21 @@ export default function Onboarding({
       : receipt.status === "uploading"
         ? "Wait for the upload to finish."
         : (receipt.error ?? "Upload your payment slip.");
-  const errorsByStep: Record<number, FormErrors> = {
-    0: validateIgl(igl),
-    1: validateTeam(team),
-    2: slipError ? { slip: slipError } : {},
-    3: allAccepted ? {} : { agreements: "Accept every rule to continue." },
-    4: {},
-  };
+
+  const errorsByStep: Record<number, FormErrors> = isIndividual
+    ? {
+        0: validateIndividualPlayer(individual),
+        1: slipError ? { slip: slipError } : {},
+        2: allAccepted ? {} : { agreements: "Accept every rule to continue." },
+        3: {},
+      }
+    : {
+        0: validateIgl(igl),
+        1: validateTeam(team),
+        2: slipError ? { slip: slipError } : {},
+        3: allAccepted ? {} : { agreements: "Accept every rule to continue." },
+        4: {},
+      };
 
   const errors = errorsByStep[step] ?? {};
   const visible: FormErrors = showErrors ? errors : {};
@@ -107,8 +149,9 @@ export default function Onboarding({
     setStep(0);
     setIgl(emptyIgl());
     setTeam(newTeam());
+    setIndividual(emptyIndividual());
     receipt.choose(null);
-    setAccepted(noRulesAccepted());
+    setAccepted(rules.map(() => false));
     setShowErrors(false);
     setStatus("idle");
     setServerError("");
@@ -117,7 +160,7 @@ export default function Onboarding({
 
   const close = () => {
     if (busy) return;
-    if (step === LAST) reset();
+    if (step === last) reset();
     onClose();
   };
 
@@ -131,15 +174,22 @@ export default function Onboarding({
     setStatus("loading");
     setServerError("");
     try {
-      await registerSquad({
-        igl,
-        ...team,
-        agreementsAccepted: true,
-        receiptKey: receipt.key,
-      });
-
+      if (isIndividual) {
+        await registerIndividual({
+          player: individual,
+          agreementsAccepted: true,
+          receiptKey: receipt.key,
+        });
+      } else {
+        await registerSquad({
+          igl,
+          ...team,
+          agreementsAccepted: true,
+          receiptKey: receipt.key,
+        });
+      }
       setStatus("idle");
-      go(LAST);
+      go(last);
     } catch (err) {
       setServerError(
         err instanceof Error ? err.message : "Something went wrong. Try again.",
@@ -150,7 +200,7 @@ export default function Onboarding({
 
   const next = () => {
     if (Object.keys(errors).length > 0) return setShowErrors(true);
-    if (step === 0 && !p1Edited.current) {
+    if (!isIndividual && step === 0 && !p1Edited.current) {
       const { fullName, age, whatsapp, area } = igl;
       setTeam((current) => ({
         ...current,
@@ -159,7 +209,7 @@ export default function Onboarding({
         ),
       }));
     }
-    if (step === LAST - 1) return void submit();
+    if (step === last - 1) return void submit();
     go(step + 1);
   };
 
@@ -177,7 +227,13 @@ export default function Onboarding({
     }));
   };
 
-  const current = STEPS[step];
+  const current = steps[step];
+  const fee = isIndividual
+    ? registrationDetails.individualFee
+    : registrationDetails.squadFee;
+  const feeText = isIndividual
+    ? registrationDetails.individualFeeText
+    : registrationDetails.squadFeeText;
 
   return (
     <Dialog
@@ -202,8 +258,7 @@ export default function Onboarding({
             <header className="relative flex items-start justify-between gap-4 px-5 pt-6 pb-4 sm:px-8">
               <div>
                 <p className="mb-2 flex items-center gap-3 font-heading text-[11px] font-semibold tracking-[0.3em] text-lime uppercase">
-                  {/* <span className="h-px w-6 bg-lime" aria-hidden="true" /> */}
-                  Registration
+                  Registration · {isIndividual ? "Individual" : "Squad"}
                 </p>
                 <DialogTitle className="font-display text-3xl leading-none font-extrabold uppercase sm:text-4xl">
                   {current?.title}
@@ -231,46 +286,104 @@ export default function Onboarding({
               ref={bodyRef}
               className="relative min-h-0 flex-1 overflow-y-auto px-5 py-2 sm:px-8"
             >
-              <div key={step} className="animate-rise pb-4">
-                {step === 0 && (
-                  <IglStep
-                    value={igl}
-                    errors={visible}
-                    onChange={(field, value) =>
-                      setIgl((currentIgl) => ({
-                        ...currentIgl,
-                        [field]: value,
-                      }))
-                    }
-                  />
+              <div key={`${mode}-${step}`} className="animate-rise pb-4">
+                {isIndividual ? (
+                  <>
+                    {step === 0 && (
+                      <IndividualStep
+                        value={individual}
+                        errors={visible}
+                        onChange={(field, value) =>
+                          setIndividual((current) => ({
+                            ...current,
+                            [field]: value,
+                          }))
+                        }
+                      />
+                    )}
+                    {step === 1 && (
+                      <PaymentStep
+                        receipt={receipt}
+                        error={visible.slip}
+                        fee={fee}
+                        feeText={feeText}
+                      />
+                    )}
+                    {step === 2 && (
+                      <AgreementsStep
+                        rules={rules}
+                        accepted={accepted}
+                        error={visible.agreements}
+                        onToggle={(i) =>
+                          setAccepted((currentAccepted) =>
+                            currentAccepted.map((value, j) =>
+                              j === i ? !value : value,
+                            ),
+                          )
+                        }
+                      />
+                    )}
+                    {step === last && (
+                      <ConfirmationStep
+                        teamName={individual.fullName}
+                        individual
+                      />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {step === 0 && (
+                      <IglStep
+                        value={igl}
+                        errors={visible}
+                        onChange={(field, value) =>
+                          setIgl((currentIgl) => ({
+                            ...currentIgl,
+                            [field]: value,
+                          }))
+                        }
+                      />
+                    )}
+                    {step === 1 && (
+                      <TeamStep
+                        value={team}
+                        errors={visible}
+                        onTeamName={(teamName) =>
+                          setTeam((currentTeam) => ({
+                            ...currentTeam,
+                            teamName,
+                          }))
+                        }
+                        onPlayer={setPlayer}
+                      />
+                    )}
+                    {step === 2 && (
+                      <PaymentStep
+                        receipt={receipt}
+                        error={visible.slip}
+                        fee={fee}
+                        feeText={feeText}
+                      />
+                    )}
+                    {step === 3 && (
+                      <AgreementsStep
+                        rules={rules}
+                        accepted={accepted}
+                        error={visible.agreements}
+                        onToggle={(i) =>
+                          setAccepted((currentAccepted) =>
+                            currentAccepted.map((value, j) =>
+                              j === i ? !value : value,
+                            ),
+                          )
+                        }
+                      />
+                    )}
+                    {step === last && (
+                      <ConfirmationStep teamName={team.teamName} />
+                    )}
+                  </>
                 )}
-                {step === 1 && (
-                  <TeamStep
-                    value={team}
-                    errors={visible}
-                    onTeamName={(teamName) =>
-                      setTeam((currentTeam) => ({ ...currentTeam, teamName }))
-                    }
-                    onPlayer={setPlayer}
-                  />
-                )}
-                {step === 2 && (
-                  <PaymentStep receipt={receipt} error={visible.slip} />
-                )}
-                {step === 3 && (
-                  <AgreementsStep
-                    accepted={accepted}
-                    error={visible.agreements}
-                    onToggle={(i) =>
-                      setAccepted((currentAccepted) =>
-                        currentAccepted.map((value, j) =>
-                          j === i ? !value : value,
-                        ),
-                      )
-                    }
-                  />
-                )}
-                {step === LAST && <ConfirmationStep teamName={team.teamName} />}
               </div>
             </div>
 
@@ -289,7 +402,7 @@ export default function Onboarding({
               )}
 
               <div className="flex justify-center gap-2" aria-hidden="true">
-                {STEPS.map((item, i) => (
+                {steps.map((item, i) => (
                   <span
                     key={item.title}
                     className={cn(
@@ -304,11 +417,11 @@ export default function Onboarding({
                 ))}
               </div>
               <p className="sr-only" aria-live="polite">
-                Step {step + 1} of {STEPS.length}
+                Step {step + 1} of {steps.length}
               </p>
 
               <div className="mt-4 flex gap-3">
-                {step > 0 && step < LAST && (
+                {step > 0 && step < last && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -320,20 +433,21 @@ export default function Onboarding({
                     Back
                   </Button>
                 )}
-                {step < LAST ? (
+                {step < last ? (
                   <Button
                     type="button"
                     className="h-14 flex-1 font-heading font-semibold tracking-wide uppercase"
                     onClick={next}
                     disabled={
                       busy ||
-                      (step === LAST - 1 && !allAccepted) ||
-                      (step === 2 && receipt.status === "uploading")
+                      (step === rulesStep && !allAccepted) ||
+                      (step === paymentStep &&
+                        receipt.status === "uploading")
                     }
                   >
                     {busy
                       ? "Submitting"
-                      : step < LAST - 1
+                      : step < last - 1
                         ? "Continue"
                         : status === "error"
                           ? "Try again"

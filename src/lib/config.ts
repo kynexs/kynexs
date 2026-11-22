@@ -46,6 +46,11 @@ export const easypaisaDetails = {
 } as const;
 
 export const registrationDetails = {
+  squadFee: 2000,
+  squadFeeText: "2000 is the whole team registration fee.",
+  individualFee: 500,
+  individualFeeText: "500 is the individual registration fee.",
+  /** @deprecated use squadFee — kept for any leftover imports */
   registrationFee: 2000,
   registrationFeeText: "2000 is the whole team registration fee.",
 } as const;
@@ -59,6 +64,18 @@ export const tournamentRules = [
   "I will keep my squad's WhatsApp number reachable for match updates.",
   "All the details I provided are true, and my payment slip is genuine.",
   "The organiser's decisions are final.",
+] as const;
+
+/** individual placement rule. */
+export const individualTournamentRules = [
+  "I will play fair. No cheating, hacks, scripts or teaming with other players.",
+  "No emulators. I will compete only on a real mobile device.",
+  "I will be on time for every match and check-in.",
+  "I will use the PUBG name registered in this form.",
+  "I will keep my WhatsApp number reachable for match updates.",
+  "All the details I provided are true, and my payment slip is genuine.",
+  "The organiser's decisions are final.",
+  "I accept that the organisers may assign me to any squad, and I will not dispute that assignment on match day.",
 ] as const;
 
 export const confirmationMessage =

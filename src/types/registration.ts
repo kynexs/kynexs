@@ -4,6 +4,8 @@ export type SlipType =
   | "image/webp"
   | "application/pdf";
 
+export type RegistrationType = "INDIVIDUAL" | "SQUAD";
+
 export type IglDetails = {
   fullName: string;
   whatsapp: string;
@@ -20,12 +22,27 @@ export type PlayerDetails = {
 };
 export type TeamDetails = { teamName: string; players: PlayerDetails[] };
 
+export type IndividualDetails = {
+  fullName: string;
+  email: string;
+  whatsapp: string;
+  age: string;
+  pubgName: string;
+  area: string;
+};
+
 /** What the form sends as JSON. `receiptKey` comes from /api/upload. Ages stay strings until validated. */
 export type RegistrationInput = TeamDetails & {
   igl: IglDetails;
   agreementsAccepted: boolean;
   receiptKey: string;
   referralCode?: string;
+};
+
+export type IndividualInput = {
+  player: IndividualDetails;
+  agreementsAccepted: boolean;
+  receiptKey: string;
 };
 
 /** Flat map keyed by path, e.g. "igl.email", "teamName", "players.2.pubgName". */
@@ -37,6 +54,8 @@ export type RegistrationData = {
   receiptKey: string;
   receiptFileName: string;
   teamName: string;
+  type: RegistrationType;
+  fee: number;
   referralCode: string | null;
   igl: {
     fullName: string;
@@ -85,6 +104,8 @@ export type RegistrationRow = {
   contactAge: number;
   contactArea: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
+  type: RegistrationType;
+  fee: number;
   referralCodeEntered: string | null;
   createdAt: string;
   players: RegistrationPlayer[];
@@ -93,7 +114,9 @@ export type RegistrationRow = {
 
 export type RegistrationStats = {
   totalRegistrations: number;
-  withSlip: number;
   totalPlayers: number;
+  squadCount: number;
+  individualCount: number;
+  withSlip: number;
   withoutSlip: number;
 };

@@ -22,19 +22,31 @@ export function createRegistrationColumns(canDelete: boolean) {
     columnHelper.accessor("contactName", {
       id: "contactName",
       header: "Registration Name",
-      cell: ({ row, getValue }) => (
-        <div className="min-w-40">
-          <p className="font-medium">{getValue()}</p>
-          <p className="text-xs text-muted-foreground">
-            {row.original.teamName}
-          </p>
-        </div>
-      ),
+      cell: ({ row, getValue }) => {
+        const isIndividual = row.original.type === "INDIVIDUAL";
+        const teamName = row.original.teamName.trim();
+        const showTeam =
+          !isIndividual && teamName && teamName !== getValue().trim();
+        return (
+          <div className="min-w-40">
+            <p className="font-medium">{getValue()}</p>
+            {showTeam && (
+              <p className="text-xs text-muted-foreground">{teamName}</p>
+            )}
+          </div>
+        );
+      },
       filterFn: "includesString",
     }),
     columnHelper.accessor("contactWhatsapp", {
       id: "contactWhatsapp",
       header: "Phone Number",
+    }),
+    columnHelper.accessor("type", {
+      id: "type",
+      header: "Status",
+      cell: ({ getValue }) =>
+        getValue() === "INDIVIDUAL" ? "Individual" : "Squad",
     }),
     columnHelper.display({
       id: "slip",

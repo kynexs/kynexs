@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Learned User Preferences
 
-- Match reference images and the existing design system exactly; do not redesign or “improve” visuals unless asked.
+- Match reference images and the existing design system exactly; do not redesign or “improve” visuals unless asked (including email templates).
 - Keep Tailwind v4 CSS-first config only; do not add or use `tailwind.config.ts`.
 - Prefer server actions for registration/contact mutations over API-route fetch services.
 - For large multi-step work: explore first, write a plan (often `docs/plan.md`), stop for approval, then implement only after explicit approval.
@@ -18,6 +18,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Prefer preferred folders: `src/actions`, `src/validations`, `src/types`, `src/services` for mutations, schemas, types, and third-party wrappers.
 - Do not rewrite stock shadcn components just to silence Biome a11y/hook noise; fix only new code.
 - Follow existing project conventions and ship the smallest complete change; no drive-by refactors.
+- Deferred features (e.g. referral): hide/comment frontend only, leave a `TODO -- Update Referral in Future`, and do not strip backend unless asked.
 
 ## Learned Workspace Facts
 
@@ -26,6 +27,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Prisma is pinned to v7 with traditional `prisma/schema.prisma` (Postgres/Neon); client output under `prisma/generated/prisma`.
 - Auth is Better Auth (not Clerk): `src/services/auth.ts`, `src/services/auth-client.ts`, and `src/app/api/auth/[...all]/route.ts`; dashboard protection uses Better Auth session cookies in `src/proxy.ts`.
 - Route groups: `(landing)` owns public chrome and paths like `/contact` and `/matches`; dashboard must avoid colliding paths (e.g. `/contacts`, `/total-matches`, `/gaming-zones`).
-- Domain models include Registration/Player/Receipt, Contact (with reply status), GamingZone, and Game enum (`PUBG` / `FREE_FIRE`).
+- Domain models include Registration/Player/Receipt, Contact (with reply status), and GamingZone; registration is PUBG-only (no Game/Free Fire enum).
+- Registration age is capped at 21 (`MAX_AGE` in `src/validations/fields.ts`); ages 22+ are rejected.
 - Receipt/slip uploads use S3-compatible Neon object storage helpers; validation is custom field/domain validators (not Zod).
 - Dashboard registration UI uses TanStack Table v9 with shadcn Data Table patterns and sidebar shell under `(dashboard)`.
+- Post-registration emails use Resend (`src/services/resend.ts`, templates in `src/emails/`); owner/support contacts come from `supportContact` via `OWNER_EMAIL` / `SUPPORT_WHATSAPP`.
+- Payment step shows UBL bank and EasyPaisa details from `src/lib/config.ts` (`bankDetails`, `easypaisaDetails`).

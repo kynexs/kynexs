@@ -22,6 +22,7 @@ export type RegistrationEmailPlayer = {
 
 export type RegistrationEmailPayload = {
   teamName: string;
+  type: "INDIVIDUAL" | "SQUAD";
   players: RegistrationEmailPlayer[];
 };
 
@@ -118,13 +119,24 @@ function playerCard(
     </td>`;
 }
 
-/** Email-safe 2×2 roster: P1|P2 then P3|P4. */
+/** Email-safe roster: 2×2 for squads, single card for individual. */
 function playerGrid(
   players: RegistrationEmailPlayer[],
   mode: "namePhone" | "full",
 ): string {
+  if (players.length <= 1) {
+    return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;">
+      <tr>
+        ${playerCard(players[0], mode)}
+        <td width="50%" style="width:50%;padding:4px;"></td>
+      </tr>
+    </table>`;
+  }
+
   const bySlot = [1, 2, 3, 4].map(
-    (slot) => players.find((player) => player.slot === slot) ?? players[slot - 1],
+    (slot) =>
+      players.find((player) => player.slot === slot) ?? players[slot - 1],
   );
 
   return `
@@ -143,15 +155,21 @@ function playerGrid(
 export function registrationConfirmationEmail(
   payload: RegistrationEmailPayload,
 ): { subject: string; html: string } {
-  const subject = `Squad locked · ${payload.teamName}`;
+  const isIndividual = payload.type === "INDIVIDUAL";
+  const subject = isIndividual
+    ? `You're in · ${payload.teamName}`
+    : `Squad locked · ${payload.teamName}`;
+  const intro = isIndividual
+    ? `You are registered with ${esc(siteConfig.name)} as an individual player.`
+    : `Your squad <strong style="color:${COLORS.white};">${esc(payload.teamName)}</strong> is registered with ${esc(siteConfig.name)}.`;
   const html = shell(
     "Registration complete",
     `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:${COLORS.muted};">
-        Your squad <strong style="color:${COLORS.white};">${esc(payload.teamName)}</strong> is registered with ${esc(siteConfig.name)}.
+        ${intro}
       </p>
       <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${COLORS.lime};font-weight:700;">
-        Squad roster
+        ${isIndividual ? "Player" : "Squad roster"}
       </p>
       ${playerGrid(payload.players, "namePhone")}
       <p style="margin:20px 0 0;font-size:15px;line-height:1.6;color:${COLORS.muted};">
@@ -171,21 +189,28 @@ export function registrationConfirmationEmail(
 export function registrationOwnerEmail(
   payload: RegistrationEmailPayload,
 ): { subject: string; html: string } {
-  const subject = `New registration · ${payload.teamName}`;
+  const isIndividual = payload.type === "INDIVIDUAL";
+  const subject = `New ${isIndividual ? "individual" : "squad"} · ${payload.teamName}`;
   const html = shell(
-    "New squad registered",
+    isIndividual ? "New individual registered" : "New squad registered",
     `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:${COLORS.muted};">
-        A new squad just completed Registration on ${esc(siteConfig.name)}.
+        A new ${isIndividual ? "individual" : "squad"} just completed registration on ${esc(siteConfig.name)}.
       </p>
       <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${COLORS.muted};font-weight:700;">
-        Team
+        Type
+      </p>
+      <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:${COLORS.white};">
+        ${isIndividual ? "Individual" : "Squad"}
+      </p>
+      <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${COLORS.muted};font-weight:700;">
+        ${isIndividual ? "Player" : "Team"}
       </p>
       <p style="margin:0 0 20px;font-size:20px;font-weight:800;color:${COLORS.white};">
         ${esc(payload.teamName)}
       </p>
       <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${COLORS.lime};font-weight:700;">
-        Players
+        Details
       </p>
       ${playerGrid(payload.players, "full")}
     `,

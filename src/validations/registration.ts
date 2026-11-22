@@ -1,8 +1,10 @@
-// Squad registration rules, shared by the onboarding flow and registerSquad.
+// Squad + individual registration rules, shared by onboarding and server actions.
+import { registrationDetails } from "@/lib/config";
 import { parseReceiptKey } from "@/lib/receipt";
 import type {
   FormErrors,
   IglDetails,
+  IndividualDetails,
   PlayerDetails,
   RegistrationData,
   SlipType,
@@ -39,6 +41,14 @@ export const emptyIgl = (): IglDetails => ({
   whatsapp: "",
   email: "",
   age: "",
+  area: "",
+});
+export const emptyIndividual = (): IndividualDetails => ({
+  fullName: "",
+  email: "",
+  whatsapp: "",
+  age: "",
+  pubgName: "",
   area: "",
 });
 
@@ -83,6 +93,19 @@ export function validateTeam(raw: unknown): FormErrors {
       validateText(p.pubgName, "PUBG name", 2, 32),
     );
   }
+  return errors;
+}
+
+export function validateIndividualPlayer(raw: unknown): FormErrors {
+  const player = obj(raw);
+  const errors: FormErrors = {};
+  checkPerson(errors, "player", player);
+  collect(errors, "player.email", validateEmail(player.email));
+  collect(
+    errors,
+    "player.pubgName",
+    validateText(player.pubgName, "PUBG ID", 2, 32),
+  );
   return errors;
 }
 
@@ -168,6 +191,8 @@ export function validateRegistration(
       receiptKey: String(input.receiptKey),
       receiptFileName: receipt.fileName,
       teamName: str(input.teamName),
+      type: "SQUAD",
+      fee: registrationDetails.squadFee,
       referralCode: normalizeReferralCode(input.referralCode),
       igl: {
         fullName: str(igl.fullName),
@@ -177,6 +202,53 @@ export function validateRegistration(
         area: str(igl.area),
       },
       players,
+    },
+  };
+}
+
+export function validateIndividualRegistration(
+  raw: unknown,
+): { ok: true; data: RegistrationData } | { ok: false; errors: FormErrors } {
+  const input = obj(raw);
+  const errors: FormErrors = {
+    ...validateIndividualPlayer(input.player),
+  };
+  if (input.agreementsAccepted !== true)
+    errors.agreementsAccepted = "You must accept all tournament rules.";
+  const receipt = parseReceiptKey(input.receiptKey);
+  if (!receipt) errors.receiptKey = "Upload your payment slip.";
+  if (!receipt || Object.keys(errors).length > 0) return { ok: false, errors };
+
+  const player = obj(input.player);
+  const fullName = str(player.fullName);
+  const whatsapp = normalizePhone(player.whatsapp);
+  const email = str(player.email).toLowerCase();
+  const age = Number(str(player.age));
+  const area = str(player.area);
+  const pubgName = str(player.pubgName);
+
+  return {
+    ok: true,
+    data: {
+      registrationId: receipt.registrationId,
+      receiptKey: String(input.receiptKey),
+      receiptFileName: receipt.fileName,
+      teamName: fullName,
+      type: "INDIVIDUAL",
+      fee: registrationDetails.individualFee,
+      referralCode: null,
+      igl: { fullName, whatsapp, email, age, area },
+      players: [
+        {
+          slot: 1,
+          isIgl: true,
+          fullName,
+          age,
+          pubgName,
+          whatsapp,
+          area,
+        },
+      ],
     },
   };
 }

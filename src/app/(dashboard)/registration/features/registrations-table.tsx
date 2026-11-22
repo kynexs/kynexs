@@ -16,8 +16,17 @@ import DataTable, {
   type DataTableInstance,
 } from "@/components/data-table/data-table";
 import { features } from "@/components/data-table/data-table-features";
-import type { RegistrationRow } from "@/types/registration";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { RegistrationRow, RegistrationType } from "@/types/registration";
 import { createRegistrationColumns } from "./columns";
+
+type TypeFilter = "ALL" | RegistrationType;
 
 export default function RegistrationsTable({
   data,
@@ -29,10 +38,11 @@ export default function RegistrationsTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
   const [dateRange, setDateRange] = useState<DateRangeValue>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   const columns = useMemo(
@@ -41,8 +51,12 @@ export default function RegistrationsTable({
   );
 
   const rows = useMemo(() => {
-    return data.filter((row) => rowInDateRange(row.createdAt, dateRange));
-  }, [data, dateRange]);
+    return data.filter((row) => {
+      if (typeFilter !== "ALL" && row.type !== typeFilter) return false;
+      if (!rowInDateRange(row.createdAt, dateRange)) return false;
+      return true;
+    });
+  }, [data, typeFilter, dateRange]);
 
   const table = useTable({
     features,
@@ -95,6 +109,32 @@ export default function RegistrationsTable({
           />
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <Select
+              value={typeFilter}
+              onValueChange={(value) => {
+                if (
+                  value === "ALL" ||
+                  value === "INDIVIDUAL" ||
+                  value === "SQUAD"
+                ) {
+                  setTypeFilter(value);
+                  setPagination((current) => ({ ...current, pageIndex: 0 }));
+                }
+              }}
+            >
+              <SelectTrigger
+                className="h-10 w-[180px] bg-surface-200"
+                aria-label="Filter by registration type"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All types</SelectItem>
+                <SelectItem value="INDIVIDUAL">Individual</SelectItem>
+                <SelectItem value="SQUAD">Squad</SelectItem>
+              </SelectContent>
+            </Select>
+
             <DateRangeFilter
               value={dateRange}
               onChange={(next) => {

@@ -5,17 +5,27 @@ const cards = [
   {
     key: "totalRegistrations" as const,
     title: "Total Registrations",
-    hint: "All squads in the system",
+    hint: "All registrations in the system",
+  },
+  {
+    key: "totalPlayers" as const,
+    title: "Total Players",
+    hint: "Players across all registrations",
+  },
+  {
+    key: "squadCount" as const,
+    title: "Squad Registrations",
+    hint: "Full squad sign-ups",
+  },
+  {
+    key: "individualCount" as const,
+    title: "Individual Registrations",
+    hint: "Solo player sign-ups",
   },
   {
     key: "withSlip" as const,
     title: "Payment Slips",
     hint: "Registrations with a slip",
-  },
-  {
-    key: "totalPlayers" as const,
-    title: "Total Players",
-    hint: "Players across all squads",
   },
   {
     key: "withoutSlip" as const,

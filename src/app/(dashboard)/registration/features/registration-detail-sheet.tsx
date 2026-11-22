@@ -32,7 +32,9 @@ export default function RegistrationDetailSheet({
             {registration?.contactName ?? "Registration"}
           </SheetTitle>
           <SheetDescription>
-            Full squad details and payment slip
+            {registration?.type === "INDIVIDUAL"
+              ? "Individual registration details and payment slip"
+              : "Full squad details and payment slip"}
           </SheetDescription>
         </SheetHeader>
 
@@ -40,16 +42,25 @@ export default function RegistrationDetailSheet({
           <div className="flex flex-col gap-6 p-4">
             <dl className="grid gap-3 text-sm">
               <Row label="Registration ID" value={registration.id} mono />
+              <Row
+                label="Type"
+                value={
+                  registration.type === "INDIVIDUAL" ? "Individual" : "Squad"
+                }
+              />
               <Row label="Name" value={registration.contactName} />
               <Row label="Phone" value={registration.contactWhatsapp} />
-              <Row label="Team" value={registration.teamName} />
+              {registration.type === "SQUAD" && (
+                <Row label="Team" value={registration.teamName} />
+              )}
               <Row label="Email" value={registration.contactEmail} />
               <Row label="Area" value={registration.contactArea} />
+              <Row label="Fee" value={`Rs ${registration.fee}`} />
             </dl>
 
             <section className="space-y-3">
               <h3 className="font-heading text-xs font-semibold tracking-[0.25em] text-lime uppercase">
-                Players
+                {registration.type === "INDIVIDUAL" ? "Player" : "Players"}
               </h3>
               <ul className="space-y-3">
                 {registration.players.map((player) => (

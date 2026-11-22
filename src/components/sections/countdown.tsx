@@ -42,7 +42,7 @@ export default function Countdown({
     <div className={className}>
       <div
         role="timer"
-        aria-label={`Time until registrations open${label ? `: ${label}` : ""}`}
+        aria-label={`Time until match day${label ? `: ${label}` : ""}`}
         className="flex gap-2 sm:gap-3"
       >
         {UNITS.map(({ key, label: unit }, i) => {

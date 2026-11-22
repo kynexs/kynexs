@@ -10,6 +10,8 @@ export type { GamingZoneRow, GamingZoneStats } from "./gaming-zones";
 export type {
   FormErrors,
   IglDetails,
+  IndividualDetails,
+  IndividualInput,
   PlayerDetails,
   RegistrationData,
   RegistrationInput,
@@ -17,6 +19,7 @@ export type {
   RegistrationReceipt,
   RegistrationRow,
   RegistrationStats,
+  RegistrationType,
   SlipType,
   TeamDetails,
 } from "./registration";

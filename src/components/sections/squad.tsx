@@ -27,7 +27,7 @@ export default function Squad() {
               Squad <span className="text-lime">up.</span>
             </>
           }
-          description="Every squad needs its roles. Find yours before registrations open."
+          description="Every squad needs its roles. Find yours — registrations are opened."
         />
 
         <Reveal delay={150}>

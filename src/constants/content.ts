@@ -25,12 +25,29 @@ export interface Fighter {
 }
 
 export const marqueeItems = [
-  "Registrations opening soon",
+  "Registrations are opened",
   "Battle royale",
   "Build your squad",
   "Karachi is waiting",
   "The next generation",
   "Prove yourself",
+] as const;
+
+export const sponsors = [
+  {
+    name: "Transworld Home",
+    href: "https://transworld-home.com/",
+    logo: "/images/sponsors/transworld.png",
+    width: 220,
+    height: 64,
+  },
+  {
+    name: "TMC North Nazimabad",
+    href: "https://tmcnorthnazimabad.gos.pk/",
+    logo: "/images/sponsors/tmc-north-nazimabad.png",
+    width: 120,
+    height: 120,
+  },
 ] as const;
 
 export const features: Feature[] = [
@@ -68,19 +85,14 @@ export const features: Feature[] = [
 
 export const steps: Step[] = [
   {
-    icon: "userPlus",
-    title: "Create account",
-    text: "Sign up and set your gamer profile.",
+    icon: "users",
+    title: "Register your team",
+    text: "Lock in as a squad or individual and upload your slip.",
   },
   {
     icon: "crosshair",
-    title: "Choose competition",
-    text: "Pick the tournament that fits your squad.",
-  },
-  {
-    icon: "users",
-    title: "Register your team",
-    text: "Build your roster and lock it in.",
+    title: "See match days and schedule",
+    text: "Check when you drop and who you face next.",
   },
   {
     icon: "zap",

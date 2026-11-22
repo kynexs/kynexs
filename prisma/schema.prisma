@@ -19,6 +19,11 @@ enum RegistrationStatus {
   REJECTED
 }
 
+enum RegistrationType {
+  INDIVIDUAL
+  SQUAD
+}
+
 model Contact {
   id        String        @id
   name      String
@@ -85,6 +90,8 @@ model Registration {
   contactArea         String
   agreementsAccepted  Boolean
   status              RegistrationStatus @default(PENDING)
+  type                RegistrationType   @default(SQUAD)
+  fee                 Int                @default(2000)
   gamingZoneId        String?
   referralCodeEntered String?
   createdAt           DateTime           @default(now())
@@ -95,8 +102,17 @@ model Registration {
 
   @@index([contactEmail])
   @@index([status, createdAt])
+  @@index([type, createdAt])
   @@index([gamingZoneId])
   @@index([createdAt])
+}
+
+model RateLimitHit {
+  id        String   @id
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
 }
 
 model User {

@@ -12,13 +12,12 @@ import {
   bankDetails,
   confirmationMessage,
   easypaisaDetails,
-  registrationDetails,
-  tournamentRules,
 } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import type {
   FormErrors,
   IglDetails,
+  IndividualDetails,
   PlayerDetails,
   TeamDetails,
 } from "@/types/registration";
@@ -59,7 +58,11 @@ const FIELD_PROPS = {
     placeholder: "e.g. Block A - North Nazimabad, Karachi",
     maxLength: 80,
   },
-  pubgName: { label: "PUBG name", placeholder: "In-game name", maxLength: 32 },
+  pubgName: {
+    label: "PUBG in-game ID",
+    placeholder: "In-game name / ID",
+    maxLength: 32,
+  },
 } as const;
 
 type FieldKind = keyof typeof FIELD_PROPS;
@@ -147,6 +150,42 @@ export function IglStep({
       {field("email", "email", "sm:col-span-2")}
       {field("area", "off", "sm:col-span-2")}
       {/* TODO -- Update Referral in Future */}
+    </div>
+  );
+}
+
+export function IndividualStep({
+  value,
+  errors,
+  onChange,
+}: {
+  value: IndividualDetails;
+  errors: FormErrors;
+  onChange: (field: keyof IndividualDetails, value: string) => void;
+}) {
+  const field = (
+    kind: keyof IndividualDetails,
+    autoComplete: string,
+    className?: string,
+  ) => (
+    <Field
+      kind={kind}
+      id={`ind-${kind}`}
+      value={value[kind]}
+      error={errors[`player.${kind}`]}
+      onChange={(next) => onChange(kind, next)}
+      autoComplete={autoComplete}
+      className={className}
+    />
+  );
+  return (
+    <div className={cn(grid, "pb-24")}>
+      {field("fullName", "name", "sm:col-span-2")}
+      {field("whatsapp", "tel")}
+      {field("age", "off")}
+      {field("email", "email", "sm:col-span-2")}
+      {field("pubgName", "off", "sm:col-span-2")}
+      {field("area", "off", "sm:col-span-2")}
     </div>
   );
 }
@@ -242,9 +281,13 @@ const easypaisaRows = [
 export function PaymentStep({
   receipt,
   error,
+  fee,
+  feeText,
 }: {
   receipt: ReceiptUpload;
   error?: string;
+  fee: number;
+  feeText: string;
 }) {
   const { file: slip, status, progress, choose, retry } = receipt;
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -270,11 +313,9 @@ export function PaymentStep({
           Registration fee
         </p>
         <p className="mt-1 font-display text-3xl font-extrabold text-white">
-          Rs {registrationDetails.registrationFee.toLocaleString("en-PK")}
+          Rs {fee.toLocaleString("en-PK")}
         </p>
-        <p className="mt-1 text-sm text-text-muted">
-          {registrationDetails.registrationFeeText}
-        </p>
+        <p className="mt-1 text-sm text-text-muted">{feeText}</p>
       </div>
 
       <dl className="divide-y divide-white/10 border border-white/10 bg-surface-200/60">
@@ -293,17 +334,14 @@ export function PaymentStep({
         ))}
       </dl>
 
-      <div
-        className="flex items-center gap-3"
-        role="separator"
-        aria-label="Or pay with Easypaisa"
-      >
+      <div className="flex items-center gap-3" aria-hidden="true">
         <span className="h-px flex-1 bg-white/10" />
         <span className="font-heading text-[11px] font-semibold tracking-[0.25em] text-text-muted uppercase">
           Or
         </span>
         <span className="h-px flex-1 bg-white/10" />
       </div>
+      <span className="sr-only">Or pay with Easypaisa</span>
 
       <dl className="divide-y divide-white/10 border border-white/10 bg-surface-200/60">
         {easypaisaRows.map(([label, value]) => (
@@ -442,14 +480,16 @@ export function AgreementsStep({
   accepted,
   error,
   onToggle,
+  rules,
 }: {
   accepted: boolean[];
   error?: string;
   onToggle: (index: number) => void;
+  rules: readonly string[];
 }) {
   return (
     <div className="space-y-3">
-      {tournamentRules.map((rule, i) => (
+      {rules.map((rule, i) => (
         <label
           key={rule}
           htmlFor={`rule-${i}`}
@@ -473,14 +513,28 @@ export function AgreementsStep({
   );
 }
 
-export function ConfirmationStep({ teamName }: { teamName: string }) {
+export function ConfirmationStep({
+  teamName,
+  individual,
+}: {
+  teamName: string;
+  individual?: boolean;
+}) {
   return (
     <output className="flex flex-col items-center px-2 py-6 text-center">
       <span className="flex size-20 items-center justify-center border-2 border-lime bg-lime/10 text-lime shadow-glow-lime">
         <Icon name="check" className="size-10" />
       </span>
       <h3 className="mt-6 font-display text-5xl leading-[0.9] font-extrabold uppercase">
-        Squad <span className="text-lime">locked.</span>
+        {individual ? (
+          <>
+            You&apos;re <span className="text-lime">in.</span>
+          </>
+        ) : (
+          <>
+            Squad <span className="text-lime">locked.</span>
+          </>
+        )}
       </h3>
       <p className="mt-4 text-sm font-semibold tracking-widest text-text-muted uppercase">
         {teamName.trim()}

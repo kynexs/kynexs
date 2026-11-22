@@ -5,16 +5,26 @@ import { getObjectSignedUrl } from "@/services/s3";
 import type { RegistrationRow, RegistrationStats } from "@/types/registration";
 
 export async function getRegistrationStats(): Promise<RegistrationStats> {
-  const [totalRegistrations, withSlip, totalPlayers] = await Promise.all([
+  const [
+    totalRegistrations,
+    withSlip,
+    totalPlayers,
+    squadCount,
+    individualCount,
+  ] = await Promise.all([
     prisma.registration.count(),
     prisma.receipt.count(),
     prisma.player.count(),
+    prisma.registration.count({ where: { type: "SQUAD" } }),
+    prisma.registration.count({ where: { type: "INDIVIDUAL" } }),
   ]);
 
   return {
     totalRegistrations,
-    withSlip,
     totalPlayers,
+    squadCount,
+    individualCount,
+    withSlip,
     withoutSlip: Math.max(0, totalRegistrations - withSlip),
   };
 }
@@ -54,6 +64,8 @@ export async function listRegistrations(): Promise<RegistrationRow[]> {
         contactAge: row.contactAge,
         contactArea: row.contactArea,
         status: row.status,
+        type: row.type,
+        fee: row.fee,
         referralCodeEntered: row.referralCodeEntered,
         createdAt: row.createdAt.toISOString(),
         players: row.Player.map((player) => ({
