@@ -20,11 +20,11 @@ export async function clientIp(): Promise<string> {
   return h.get("x-real-ip")?.trim() || "unknown";
 }
 
-/** Sliding 1-hour window. Throws a user-facing Error when over the limit. */
+/** Sliding 1-hour window. Returns a user-facing error string when over the limit. */
 export async function assertRateLimit(
   kind: keyof typeof RATE_LIMITS,
   ip: string,
-): Promise<void> {
+): Promise<string | null> {
   const limit = RATE_LIMITS[kind];
   const key = `${kind}:${ip}`;
   const since = new Date(Date.now() - WINDOW_MS);
@@ -33,11 +33,9 @@ export async function assertRateLimit(
     where: { key, createdAt: { gte: since } },
   });
   if (count >= limit) {
-    throw new Error(
-      kind === "upload"
-        ? "Too many slip uploads. Try again in an hour."
-        : "Too many registrations from your network. Try again in an hour.",
-    );
+    return kind === "upload"
+      ? "Too many slip uploads. Try again in an hour."
+      : "Too many registrations from your network. Try again in an hour.";
   }
 
   await prisma.rateLimitHit.create({
@@ -48,4 +46,6 @@ export async function assertRateLimit(
   await prisma.rateLimitHit
     .deleteMany({ where: { key, createdAt: { lt: since } } })
     .catch(() => {});
+
+  return null;
 }
