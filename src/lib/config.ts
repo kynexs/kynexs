@@ -46,8 +46,8 @@ export const easypaisaDetails = {
 } as const;
 
 export const registrationDetails = {
-  registrationFee: 3000,
-  registrationFeeText: "3000 is the whole team registration fee.",
+  registrationFee: 2000,
+  registrationFeeText: "2000 is the whole team registration fee.",
 } as const;
 
 /** Every rule must be ticked before a squad can submit. 5-7 short rules works best. */
